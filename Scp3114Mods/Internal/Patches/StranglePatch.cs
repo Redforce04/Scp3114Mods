@@ -81,7 +81,7 @@ internal static class StranglePatch
 
 					HumanRole target = hub.roleManager.CurrentRole as HumanRole;
 
-					Player targetPly = Player.Get(target._lastOwner);
+					Player targetPly = Player.Get(hub);
 					if (Scp3114Mods.Singleton.Config.CanTutorialsBeStrangled && targetPly.Role == RoleTypeId.Tutorial)
 					{
 						if (Debug)
@@ -90,9 +90,9 @@ internal static class StranglePatch
 						return false;
 					}
 
-					bool strangleInnocent = Scp3114Mods.Singleton.Config.RequireEmptyHandToStrangleInnocents && isPlayerInnocent(ply);
+					bool strangleInnocent = Scp3114Mods.Singleton.Config.RequireEmptyHandToStrangleInnocents && isPlayerInnocent(targetPly);
 					if ((Scp3114Mods.Singleton.Config.RequireEmptyHandToStrangleAll ||
-					     (strangleInnocent)) && targetPly.CurrentItem is not null)
+					     strangleInnocent) && targetPly.CurrentItem is not null)
 					{
 						if (Debug)
 							Log.Debug("Strangle Disabled. - Empty Hand");
@@ -100,7 +100,7 @@ internal static class StranglePatch
 						return false;
 					}
 
-					if (Scp3114Mods.Singleton.Config.AllowStranglingInnocents && isPlayerInnocent(targetPly))
+					if (!Scp3114Mods.Singleton.Config.AllowStranglingInnocents && isPlayerInnocent(targetPly))
 					{
 						if (Debug)
 							Log.Debug("Strangle Disabled. - Innocent");
@@ -112,6 +112,10 @@ internal static class StranglePatch
 					value = new Scp3114Strangle.StrangleTarget(hub, __instance.GetStranglePosition(target),
 						__instance.ScpRole.FpcModule.Position);
 					__result = value;
+					if (Debug)
+					{
+						Log.Debug($"Player [{ply.Nickname}] Targeting Player {targetPly.Nickname}");
+					}
 					Scp3114Mods.Singleton.AddCooldownForPlayer(ply);
 				}
 			}
@@ -135,7 +139,7 @@ internal static class StranglePatch
 	private static bool isPlayerInnocent(Player ply)
 	{
 
-		if (ply.Role is not RoleTypeId.Scientist or RoleTypeId.ClassD)
+		if (ply.Role != RoleTypeId.Scientist && ply.Role != RoleTypeId.ClassD)
 		{
 			if(Debug)
 				Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [role]");

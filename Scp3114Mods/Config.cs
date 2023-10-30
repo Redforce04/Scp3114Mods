@@ -32,7 +32,7 @@ public class Config
     [Description("How long the cooldown is for scp3114 \"grab\" attack. -1 to disable. This applies if the attack kills a player.")]
     public float StrangleCooldown { get; set; } = 30f;
     [Description("How long the cooldown is for scp3114 \"grab\" attack. This only applies if the attack doesn't kill players.")]
-    public float StranglePartialCooldown { get; set; } = 30f;
+    public float StranglePartialCooldown { get; set; } = 10f;
     
     [Description("Can Scp3114 strangle innocents / Class D or Scientists without a weapon.")]
     public bool AllowStranglingInnocents { get; set; } = true;
