@@ -9,6 +9,7 @@ namespace Scp3114Mods;
 
 public class Scp3114Mods
 {
+    public const string Version = "1.0.1";
     public static Scp3114Mods Singleton;
     
     public Harmony Harmony { get; set; }
@@ -23,7 +24,7 @@ public class Scp3114Mods
     public bool EventsRegistered { get; set; } = false;
     internal void _clearCooldownList() => _scp3114Cooldowns.Clear();
 
-    [PluginEntryPoint("Scp3114Mods", "V1.0.0", "Modifies the mechanics of Scp3114 to be more balanced.", "Redforce04")]
+    [PluginEntryPoint("Scp3114Mods", Version, "Modifies the mechanics of Scp3114 to be more balanced.", "Redforce04")]
     public void OnStart()
     {
         if (!Config.IsEnabled)
@@ -118,16 +119,17 @@ public class Scp3114Mods
         {
             try
             {
-
+                Dictionary<int, float> newVals = new Dictionary<int, float>();
                 foreach (var kvp in _scp3114Cooldowns)
                 {
                     if (_scp3114Cooldowns[kvp.Key] > 0)
-                        _scp3114Cooldowns[kvp.Key] = Mathf.Clamp(kvp.Value - 1f, 0, Config.StrangleCooldown);
+                        newVals.Add(kvp.Key, Mathf.Clamp(kvp.Value - 1f, 0, Config.StrangleCooldown));
 
                     //if (Config.Debug)
                     //    Log.Debug($"Processing player {i}: {kvp.Value}");
-
                 }
+
+                this._scp3114Cooldowns = newVals;
 
             }
             catch (Exception e)

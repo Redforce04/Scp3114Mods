@@ -134,22 +134,44 @@ internal static class StranglePatch
 
 	private static bool isPlayerInnocent(Player ply)
 	{
+
 		if (ply.Role is not RoleTypeId.Scientist or RoleTypeId.ClassD)
+		{
+			if(Debug)
+				Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [role]");
 			return false;
+		}
 		if (ply.Items.Any(x =>
 		    {
 			    if (x is Firearm)
-				    return true;
+			    {
+				    if(Debug)
+					    Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [Firearm]");
+					return true;
+			    }
+
 			    if (x.ItemTypeId is ItemType.GrenadeFlash or ItemType.GrenadeHE or ItemType.SCP018)
+			    {
+				    if(Debug)
+					    Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [Throwable]");
 				    return true;
+			    }
+
 			    if (Scp3114Mods.Singleton.Config.CandyLosesInnocence && x.ItemTypeId == ItemType.SCP330)
+			    {
+				    if(Debug)
+					    Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [Candy]");
 				    return true;
+			    }
 			    return false;
 		    }))
 		{
+			if(Debug)
+				Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [items]");
 			return false;
 		}
-
+		if(Debug)
+			Log.Debug($"IsPlayerInnocent {ply.Nickname} - true");
 		return true;
 	}
 }
