@@ -41,8 +41,7 @@ internal static class StranglePatch
 				return true;
 			__result = null;
 			Player ply = Player.Get(__instance.Owner);
-			if (Scp3114Mods.Singleton.Config.StrangleCooldown > 0 &&
-			    !Scp3114Mods.Singleton.PlayerCanStrangle(ply, out float cooldownRemaining))
+			/*if (Scp3114Mods.Singleton.Config.StrangleCooldown > 0 && !Scp3114Mods.Singleton.PlayerCanStrangle(ply, out float cooldownRemaining))
 			{
 				ply.ReceiveHint(
 					$"You cannot strangle - your strangle is on cooldown.\nTry slashing instead.\nCooldown remaining: <b>{cooldownRemaining:0} seconds</b>",
@@ -50,7 +49,7 @@ internal static class StranglePatch
 				if (Debug)
 					Log.Debug("Strangle Disabled. - Cooldown");
 				return false;
-			}
+			}*/
 
 			if (reader.Remaining == 0)
 			{
@@ -116,7 +115,7 @@ internal static class StranglePatch
 					{
 						Log.Debug($"Player [{ply.Nickname}] Targeting Player {targetPly.Nickname}");
 					}
-					Scp3114Mods.Singleton.AddCooldownForPlayer(ply);
+					Scp3114Mods.Singleton.AddCooldownForPlayer(ply, true);
 				}
 			}
 

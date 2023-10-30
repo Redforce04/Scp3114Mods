@@ -31,12 +31,34 @@ public class Config
     
     [Description("How long the cooldown is for scp3114 \"grab\" attack. -1 to disable. This applies if the attack kills a player.")]
     public float StrangleCooldown { get; set; } = 30f;
+
     [Description("How long the cooldown is for scp3114 \"grab\" attack. This only applies if the attack doesn't kill players.")]
     public float StranglePartialCooldown { get; set; } = 10f;
     
     [Description("Can Scp3114 strangle innocents / Class D or Scientists without a weapon.")]
     public bool AllowStranglingInnocents { get; set; } = true;
     
+    [Description("Items that will not prevent strangline.")]
+    public List<ItemType> StrangleNonInnocentItems = new List<ItemType>()
+    {
+        ItemType.GrenadeFlash,
+        ItemType.GrenadeHE,
+        ItemType.SCP018,
+        ItemType.GunA7,
+        ItemType.GunCom45,
+        ItemType.GunCrossvec,
+        ItemType.GunLogicer,
+        ItemType.GunRevolver,
+        ItemType.GunShotgun,
+        ItemType.GunAK,
+        ItemType.GunCom45,
+        ItemType.GunCOM15,
+        ItemType.GunCOM18,
+        ItemType.GunE11SR,
+        ItemType.GunFSP9,
+        ItemType.GunFRMG0,
+        ItemType.SCP330
+    };
     [Description("Does the target of the strangle have to have an empty hand.")]
     public bool RequireEmptyHandToStrangleAll { get; set; } = true;
     [Description("Does the target of the strangle have to have an empty hand if non innocent.")]
@@ -52,7 +74,6 @@ public class Config
     public bool FakeFiringUsesAmmo { get; set; } = false;
     [Description("Should fake firing be allowed.")]
     public bool FakeFiringAllowed { get; set; } = true;
-
 
 
 }
