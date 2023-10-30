@@ -27,13 +27,14 @@ public class Scp3114Mods
     [PluginEntryPoint("Scp3114Mods", Version, "Modifies the mechanics of Scp3114 to be more balanced.", "Redforce04")]
     public void OnStart()
     {
-        if (!Config.IsEnabled)
-            return;
+        
         Singleton = this;
         Log.Info("Scp3114Mods has been initialized." + ( Config.Debug ? " [Debug]" : ""));
         _scp3114Cooldowns = new Dictionary<int, float>();
         Handlers = new EventHandlers();
         Harmony = new Harmony("me.redforce04.scp3114mods");
+        if (!Config.IsEnabled)
+            return;
         RegisterEvents();
     }
 
