@@ -14,7 +14,11 @@ using System.ComponentModel;
 
 namespace Scp3114Mods;
 
+#if !EXILED
 public class Config
+#else
+public class Config : Exiled.API.Interfaces.IConfig
+#endif
 {
     [Description("Determines whether the plugin is enabled or not.")]
     public bool IsEnabled { get; set; } = true;
@@ -63,7 +67,13 @@ public class Config
     public bool RequireEmptyHandToStrangleAll { get; set; } = true;
     [Description("Does the target of the strangle have to have an empty hand if non innocent.")]
     public bool RequireEmptyHandToStrangleInnocents { get; set; } = true;
-    
+
+    [Description("A list of items that will be considered \"empty hands\" for the empty hand strangle config.")]
+    public List<ItemType> ItemsThatWontBlockStrangle { get; set; } = new List<ItemType>()
+    {
+        
+    };
+
     [Description("Can tutorials be strangled.")]
     public bool CanTutorialsBeStrangled { get; set; } = false;
 
@@ -74,6 +84,18 @@ public class Config
     public bool FakeFiringUsesAmmo { get; set; } = false;
     [Description("Should fake firing be allowed.")]
     public bool FakeFiringAllowed { get; set; } = true;
+
+    [Description("Should fake firing be allowed.")]
+    public bool StartInDisguiseOfSelf { get; set; } = true;
+
+    [Description("How long shoud disguises last before being destroyed. -1 is infinite, and 0 is game default.")]
+    public float DisguiseDuration { get; set; } = 0;
+
+    [Description("How long the cooldown between new disguises lasts. -1 is game default.")]
+    public float DisguiseCooldown { get; set; } = -1;
+    
+    [Description("How long the cooldown after a failed disguis lasts. -1 is game default.")]
+    public float DisguiseFailedCooldown { get; set; } = -1;
 
 
 }

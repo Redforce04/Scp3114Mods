@@ -91,7 +91,7 @@ internal static class StranglePatch
 
 					bool strangleInnocent = Scp3114Mods.Singleton.Config.RequireEmptyHandToStrangleInnocents && isPlayerInnocent(targetPly);
 					if ((Scp3114Mods.Singleton.Config.RequireEmptyHandToStrangleAll ||
-					     strangleInnocent) && targetPly.CurrentItem is not null)
+					     strangleInnocent) && targetPly.CurrentItem is not null && !Scp3114Mods.Singleton.Config.ItemsThatWontBlockStrangle.Contains(targetPly.CurrentItem.ItemTypeId))
 					{
 						if (Debug)
 							Log.Debug("Strangle Disabled. - Empty Hand");
@@ -101,21 +101,17 @@ internal static class StranglePatch
 
 					if (!Scp3114Mods.Singleton.Config.AllowStranglingInnocents && isPlayerInnocent(targetPly))
 					{
-						if (Debug)
-							Log.Debug("Strangle Disabled. - Innocent");
+						if (Debug) Log.Debug("Strangle Disabled. - Innocent");
 						ply.ReceiveHint($"Cannot strangle innocent players. They must have a weapon{(Scp3114Mods.Singleton.Config.CandyLosesInnocence ? " or candy." : "")}.", 5f);
 						return false;
 					}
 
 					hub.playerEffectsController.EnableEffect<Strangled>();
-					value = new Scp3114Strangle.StrangleTarget(hub, __instance.GetStranglePosition(target),
-						__instance.ScpRole.FpcModule.Position);
+					value = new Scp3114Strangle.StrangleTarget(hub, __instance.GetStranglePosition(target), __instance.ScpRole.FpcModule.Position);
 					__result = value;
-					if (Debug)
-					{
-						Log.Debug($"Player [{ply.Nickname}] Targeting Player {targetPly.Nickname}");
-					}
-					Scp3114Mods.Singleton.AddCooldownForPlayer(ply, true);
+					if (Scp3114Mods.Singleton.Config is { StrangleCooldown: < 0, StranglePartialCooldown: <= 0 })
+						Scp3114Mods.Singleton.AddCooldownForPlayer(__instance);
+					if (Debug) Log.Debug($"Player [{ply.Nickname}] Targeting Player {targetPly.Nickname}");
 				}
 			}
 
@@ -126,10 +122,8 @@ internal static class StranglePatch
 		catch (Exception e)
 		{
 			Log.Error("Scp3114Mods has caught an error at Strangle Patch.");
-			if (Scp3114Mods.Singleton.Config.Debug)
-			{
-				Log.Debug($"Exception: \n{e}");
-			}
+			if (Debug) Log.Debug($"Exception: \n{e}");
+			
 
 			return true;
 		}
@@ -140,41 +134,36 @@ internal static class StranglePatch
 
 		if (ply.Role != RoleTypeId.Scientist && ply.Role != RoleTypeId.ClassD)
 		{
-			if(Debug)
-				Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [role]");
+			if(Debug) Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [role]");
 			return false;
 		}
 		if (ply.Items.Any(x =>
 		    {
 			    if (x is Firearm)
 			    {
-				    if(Debug)
-					    Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [Firearm]");
+				    if(Debug) Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [Firearm]");
 					return true;
 			    }
 
 			    if (x.ItemTypeId is ItemType.GrenadeFlash or ItemType.GrenadeHE or ItemType.SCP018)
 			    {
-				    if(Debug)
-					    Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [Throwable]");
+				    if(Debug) Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [Throwable]");
 				    return true;
 			    }
 
 			    if (Scp3114Mods.Singleton.Config.CandyLosesInnocence && x.ItemTypeId == ItemType.SCP330)
 			    {
-				    if(Debug)
-					    Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [Candy]");
+				    if(Debug) Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [Candy]");
 				    return true;
 			    }
+			    
 			    return false;
 		    }))
 		{
-			if(Debug)
-				Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [items]");
+			if(Debug) Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [items]");
 			return false;
 		}
-		if(Debug)
-			Log.Debug($"IsPlayerInnocent {ply.Nickname} - true");
+		if(Debug) Log.Debug($"IsPlayerInnocent {ply.Nickname} - true");
 		return true;
 	}
 }

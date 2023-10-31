@@ -22,20 +22,13 @@ using PluginAPI.Core;
 using PluginAPI.Core.Attributes;
 using PluginAPI.Enums;
 using PluginAPI.Events;
+using Scp3114Mods.API;
 using UnityEngine;
 
 namespace Scp3114Mods;
 
 public class EventHandlers
 {
-
-    [PluginEvent(ServerEventType.PlayerDeath)]
-    internal void OnDeath(PlayerDeathEvent ev)
-    {
-        if (ev.DamageHandler is not Scp3114DamageHandler damageHandler)
-            return;
-        Scp3114Mods.Singleton.AddCooldownForPlayer(Player.Get(damageHandler.Attacker.PlayerId), false);
-    }
 
     [PluginEvent(ServerEventType.PlayerChangeItem)]
     internal void ShowMessage(PlayerChangeItemEvent ev)
@@ -69,6 +62,25 @@ public class EventHandlers
     internal void OnRoundStart()
     {
         Scp3114Mods.Singleton._clearCooldownList();
+    }
+
+    [PluginEvent(ServerEventType.PlayerChangeRole)]
+    internal void OnRoleChange(PlayerChangeRoleEvent ev)
+    {
+        if (ev.NewRole != RoleTypeId.Scp3114)
+            return;
+        try
+        {
+            if(Scp3114Mods.Singleton.Config.DisguiseDuration != 0)
+                ev.Player.SetDisguisePermanentDuration(Scp3114Mods.Singleton.Config.DisguiseDuration == -1 ? float.MaxValue : Scp3114Mods.Singleton.Config.DisguiseDuration);
+            if(Scp3114Mods.Singleton.Config.StartInDisguiseOfSelf)
+                ev.Player.SetDisguise(ev.Player.Nickname, UnityEngine.Random.Range(0, 4) == 1 ? RoleTypeId.Scientist : RoleTypeId.ClassD);
+        }
+        catch (Exception e)
+        {
+            Log.Warning("Could not give player a disguise of themself.");
+            if(Scp3114Mods.Singleton.Config.Debug) Log.Debug($"Exception: \n{e}");
+        }
     }
 
     public void OnPlayerThrowItem(Player ply , ushort itemSerial, bool tryThrow)
