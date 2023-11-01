@@ -73,8 +73,21 @@ public class EventHandlers
         try
         {
             if (Config.Dbg) Log.Debug("Scp 3114 processing actions");
-            if(Scp3114Mods.Singleton.Config.DisguiseDuration != 0)
+            if (Scp3114Mods.Singleton.Config.StranglePartialCooldown > 0)
+            {
+                Timing.CallDelayed(.1f, () =>
+                {
+                    if (!(ev.Player.RoleBase is not Scp3114Role role ||
+                          !role.SubroutineModule.TryGetSubroutine<Scp3114Strangle>(out var strangle) ||
+                          strangle is null))
+                        strangle._postReleaseCooldown = Scp3114Mods.Singleton.Config.StranglePartialCooldown;
+
+                });
+            }
+            if (Scp3114Mods.Singleton.Config.DisguiseDuration != 0)
+            {
                 Timing.CallDelayed(.1f, () => ev.Player.SetDisguisePermanentDuration(Scp3114Mods.Singleton.Config.DisguiseDuration == -1 ? float.MaxValue : Scp3114Mods.Singleton.Config.DisguiseDuration));
+            }
             if(Scp3114Mods.Singleton.Config.StartInDisguiseOfSelf)
                 Timing.CallDelayed(.1f, () => ev.Player.SetDisguise(ev.Player.Nickname, UnityEngine.Random.Range(0, 4) == 1 ? RoleTypeId.Scientist : RoleTypeId.ClassD));
         }
@@ -116,16 +129,17 @@ public class EventHandlers
         switch (firearm.ActionModule)
         {
             case AutomaticAction automatic:
-                sender.ReferenceHub.networkIdentity.connectionToClient.Send<GunAudioMessage>(new GunAudioMessage(ReferenceHub._hostHub, automatic._dryfireClip, 10, sender.ReferenceHub));
                 firearm.ServerSendAudioMessage((byte)(automatic)._dryfireClip);
+                PlayGunshotForOwner(firearm, automatic._dryfireClip);
+
                 break;
             case PumpAction pump:
-                sender.ReferenceHub.networkIdentity.connectionToClient.Send<GunAudioMessage>(new GunAudioMessage(ReferenceHub._hostHub, (byte)pump._dryfireClip, 10, sender.ReferenceHub));
                 firearm.ServerSendAudioMessage((byte)(pump)._dryfireClip);
+                PlayGunshotForOwner(firearm, pump._dryfireClip);
                 break;
             case DoubleAction doubleAction:
-                sender.ReferenceHub.networkIdentity.connectionToClient.Send<GunAudioMessage>(new GunAudioMessage(ReferenceHub._hostHub, doubleAction._dryfireClip, 10, sender.ReferenceHub));
                 firearm.ServerSendAudioMessage((byte)(doubleAction)._dryfireClip);
+                PlayGunshotForOwner(firearm, doubleAction._dryfireClip);
                 break;
         }
     }
@@ -177,8 +191,13 @@ public class EventHandlers
             {
                 pump._lastShotStopwatch.Restart();
             }
-            firearm.Status = new FirearmStatus((byte)(firearm.Status.Ammo - 1), firearm.Status.Flags, firearm.Status.Attachments);
-            firearm.Owner.networkIdentity.connectionToClient.Send<GunAudioMessage>(new GunAudioMessage(ReferenceHub._hostHub, (byte) (pump.ShotSoundId + pump.ChamberedRounds), 10, firearm.Owner));
+
+            if (Scp3114Mods.Singleton.Config.FakeFiringUsesAmmo)
+            {
+                firearm.Status = new FirearmStatus((byte)(firearm.Status.Ammo - 1), firearm.Status.Flags, firearm.Status.Attachments);
+            }
+                
+            PlayGunshotForOwner(firearm, (byte)(pump.ShotSoundId + pump.ChamberedRounds));
             firearm.ServerSendAudioMessage((byte)(pump.ShotSoundId + pump.ChamberedRounds));
             firearm.ServerSideAnimator.Play(FirearmAnimatorHashes.Fire);
             if (pump.ChamberedRounds == 0 && firearm.Status.Ammo > 0 && !firearm.IsLocalPlayer)
@@ -202,8 +221,9 @@ public class EventHandlers
                 firearm.Status = new FirearmStatus((byte)(firearm.Status.Ammo - 1), firearm.Status.Flags, firearm.Status.Attachments);
             } 
             doubleA._nextAllowedShot = Time.timeSinceLevelLoad + doubleA._cooldownAfterShot;
+            
+            PlayGunshotForOwner(firearm, (byte)firearm.AttachmentsValue(AttachmentParam.ShotClipIdOverride));
             firearm.ServerSendAudioMessage((byte)firearm.AttachmentsValue(AttachmentParam.ShotClipIdOverride));
-            firearm.Owner.networkIdentity.connectionToClient.Send<GunAudioMessage>(new GunAudioMessage(ReferenceHub._hostHub, (byte)firearm.AttachmentsValue(AttachmentParam.ShotClipIdOverride), 10, firearm.Owner));
             firearm.ServerSideAnimator.Play(FirearmAnimatorHashes.Fire);
             return;
         }
@@ -234,8 +254,8 @@ public class EventHandlers
             firearm.Status = new FirearmStatus((byte)(firearm.Status.Ammo - automatic._ammoConsumption), firearmStatusFlags, firearm.Status.Attachments);
         }
 
+        PlayGunshotForOwner(firearm);
         firearm.ServerSendAudioMessage(automatic.ShotClipId);
-            firearm.Owner.networkIdentity.connectionToClient.Send<GunAudioMessage>(new GunAudioMessage(ReferenceHub._hostHub, (byte)automatic.ShotClipId, 10, firearm.Owner));
         firearm.ServerSideAnimator.Play(FirearmAnimatorHashes.Fire);
         return;
     }
@@ -252,12 +272,24 @@ public class EventHandlers
             return;
         }
 
-        firearm.Status = new FirearmStatus((byte)(firearm.Status.Ammo - 1), firearm.Status.Flags,
-            firearm.Status.Attachments);
+        if (Scp3114Mods.Singleton.Config.FakeFiringUsesAmmo)
+        {
+            firearm.Status = new FirearmStatus((byte)(firearm.Status.Ammo - 1), firearm.Status.Flags, firearm.Status.Attachments);
+        }
         firearm.ServerSendAudioMessage(0);
-            firearm.Owner.networkIdentity.connectionToClient.Send<GunAudioMessage>(new GunAudioMessage(ReferenceHub._hostHub, (byte)0, 10, firearm.Owner));
+        PlayGunshotForOwner(firearm);
         if (!firearm.IsLocalPlayer)
             disruptor._lastShotTime = disruptor.CurTime;
         firearm.ServerSideAnimator.Play(FirearmAnimatorHashes.Fire, 0, disruptor.ShotDelay / 2.2667f);
+    }
+
+    private void PlayGunshotForOwner(Firearm firearm, int clipId = 0)
+    {
+        float num1 = firearm.AudioClips[clipId].HasFlag(FirearmAudioFlags.ScaleDistance) ? firearm.AudioClips[clipId].MaxDistance * firearm.AttachmentsValue(AttachmentParam.GunshotLoudnessMultiplier) : firearm.AudioClips[clipId].MaxDistance;
+        if (firearm.AudioClips[clipId].HasFlag(FirearmAudioFlags.IsGunshot) && (double) firearm.Owner.transform.position.y > 900.0)
+            num1 *= 2.3f;
+        float num2 = num1 * num1;
+        Player ply = Player.Get(firearm.Owner);
+        ply.PlayGunSound(firearm.ItemTypeId, (byte)(num2/255));
     }
 }

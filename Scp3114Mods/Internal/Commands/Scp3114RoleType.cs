@@ -30,6 +30,9 @@ public class Scp3114RoleType : ICommand, IUsageProvider
 
     public bool Execute(ArraySegment<string> arguments, ICommandSender sender, [UnscopedRef] out string response)
     {
+        response = "This command is still WIP and disabled.";
+        if (!Config.Dbg)
+            return false;
         if (!sender.CheckPermission(PlayerPermissions.SetGroup))
         {
             response = "You don't have permission to use this command.";
