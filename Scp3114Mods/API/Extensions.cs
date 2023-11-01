@@ -172,6 +172,7 @@ public static class Extensions
             return;
         if (!role.SubroutineModule.TryGetSubroutine<Scp3114Disguise>(out var disguise) || disguise is null)
             return;
+        disguise.Cooldown.Clear();
         disguise.Cooldown.Trigger(cooldown);
         if (Config.Dbg) Log.Debug("Triggering Cooldown for Disguise");
     }
@@ -181,6 +182,7 @@ public static class Extensions
             return;
         if (!role.SubroutineModule.TryGetSubroutine<Scp3114Strangle>(out var strangle) || strangle is null)
             return;
+        strangle.Cooldown.Clear();
         strangle.Cooldown.Trigger(cooldown);
         if (Config.Dbg) Log.Debug("Triggering Cooldown for Strangle");
     }
@@ -190,6 +192,7 @@ public static class Extensions
             return;
         if (!role.SubroutineModule.TryGetSubroutine<Scp3114Slap>(out var slap) || slap is null)
             return;
+        slap.Cooldown.Clear();
         slap.Cooldown.Trigger(cooldown);
         if (Config.Dbg) Log.Debug("Triggering Cooldown for Slap");
     }
