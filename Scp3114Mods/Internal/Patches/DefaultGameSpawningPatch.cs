@@ -20,81 +20,91 @@ using PluginAPI.Core;
 using static HarmonyLib.AccessTools;
 namespace Scp3114Mods.Internal.Patches;
 
-//[HarmonyPatch(typeof(ScpSpawner),nameof(ScpSpawner.SpawnableScps), MethodType.Getter)]
+[HarmonyPatch(typeof(ScpSpawner),nameof(ScpSpawner.SpawnableScps), MethodType.Getter)]
 internal static class DefaultGameSpawningPatch
 {
-    //[HarmonyTranspiler]
+    [HarmonyTranspiler]
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
-        PlayerRoleBase ba = null!;
-        if (ba is Scp3114Role)
-        {/*
-            //IL_0028: ldloca.s  keyValuePair
-            //IL_002A: call      instance !1 valuetype [mscorlib]System.Collections.Generic.KeyValuePair`2<valuetype PlayerRoles.RoleTypeId, class PlayerRoles.PlayerRoleBase>::get_Value()
-            //IL_002F: isinst    PlayerRoles.PlayableScps.ISpawnableScp
-            IL_0034: brtrue.s  IL_0044
+    
+            /*
+            og //IL_0028: ldloca.s  keyValuePair
+            og //IL_002A: call      instance !1 valuetype [mscorlib]System.Collections.Generic.KeyValuePair`2<valuetype PlayerRoles.RoleTypeId, class PlayerRoles.PlayerRoleBase>::get_Value()
+            og //IL_002F: isinst    PlayerRoles.PlayableScps.ISpawnableScp
+            IL_0034: brtrue.s  IL_0044    -> replace og // brfalse.s
                 
                 
             IL_0036: ldloca.s  keyValuePair
             IL_0038: call      instance !1 valuetype [mscorlib]System.Collections.Generic.KeyValuePair`2<valuetype PlayerRoles.RoleTypeId, class PlayerRoles.PlayerRoleBase>::get_Value()
             IL_003D: isinst    PlayerRoles.PlayableScps.Scp3114.Scp3114Role
             IL_0042: brfalse.s IL_0051*/
-        }
+        
         List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent(instructions);
 
         Label shortSkipLabel = generator.DefineLabel();
-        Label fullSkipLabel = generator.DefineLabel();
         int index = 01 + newInstructions.FindIndex(x => x.opcode == OpCodes.Isinst);
         int shortSkipLabelIndex = index + 1; // short 
-        int fullSkipLabelIndex = index + 5; // full skip
         var injectedInstructions = new CodeInstruction[]
             {
                 // if(kvp.value is ISpawnableScp) => skip next if
                 new (OpCodes.Brtrue_S, shortSkipLabel),
                 // if (kvp.value is Scp3114Role) => skip to after code section
-                new (OpCodes.Ldloc_S, 2),
+                new (OpCodes.Ldloca_S, 2),
                 new (OpCodes.Call, PropertyGetter(typeof(KeyValuePair<RoleTypeId,PlayerRoleBase>), nameof(KeyValuePair<RoleTypeId,PlayerRoleBase>.Value))),
                 new (OpCodes.Isinst, typeof(Scp3114Role)),
-                new (OpCodes.Brfalse_S, fullSkipLabel),
+                new (OpCodes.Brfalse_S), //, fullSkipLabel),
             };
 
-        //newInstructions[newInstructions.Count - 1].WithLabels();
-        const bool debug = true;
+        const bool debug = false;
         for (int z = 0; z < newInstructions.Count; z++)
         {
             if (z == index) // inject code at insert location
             {
                 for (int i = 0; i < injectedInstructions.Length; i++)
                 {
-                    if (debug) Log.Debug($"[{z:000} +{i:00}] {injectedInstructions[i].opcode}");
-                    yield return injectedInstructions[i];
-                    
+                    CodeInstruction instruction = injectedInstructions[i];
+                    if (i == 04)
+                    {
+                        // Move the old label on the remove brfalse -> first skip.
+                        instruction.operand = newInstructions[z].operand;
+                    }
+                    if (debug) Log.Debug(_getOpcodeDebugLabel(instruction, z, i));
+                    yield return instruction;
                 }
             }
             else // skip the index where we are inserting - we are replacing it anyways.
             {
                 var instruction = newInstructions[z];
-                string debugString = $"[{z:000}    ] {(instruction.opcode.ToString()).PadRight(13)}";
+                
                 // add the short skip label
                 if (z == shortSkipLabelIndex)
                 {
-                    debugString += $" [Short Skip]";
                     instruction = instruction.WithLabels(shortSkipLabel);
                     goto skip;
                 }
-                // add the full skip label
-                if (z == fullSkipLabelIndex)
-                {
-                    debugString += $" [Full Skip]";
-                    instruction = instruction.WithLabels(shortSkipLabel);
-                }
                 skip:
-                if(debug) Log.Debug(debugString);
+                
+                if(debug) Log.Debug(_getOpcodeDebugLabel(instruction, z));
                 yield return instruction;
             }
         }
 
         ListPool<CodeInstruction>.Shared.Return(newInstructions);
+    }
+
+    private static string _getOpcodeDebugLabel(CodeInstruction instruction, int index, int injectedIndex = -1)
+    {
+        string labelOperand = "";
+        if (instruction.operand is Label label)
+            labelOperand += $"-> ({label.GetHashCode()})";
+
+        string notedLabels = instruction.labels.Count > 0 ? "   " : "";
+        foreach (var x in instruction.labels)
+        {
+            notedLabels += $" [{x.GetHashCode()}]";
+        }
+        string injectedString = injectedIndex < 0 ? "   " : $"+{injectedIndex:00}";
+        return $"[{index:000} {injectedString}] {instruction.opcode,-10}{labelOperand,-7}{notedLabels}";
     }
     
 }
