@@ -27,7 +27,7 @@ public class Scp3114Mods : Plugin<Config, Translations>
     public override Version Version => Version.Parse(VersionName);
     public override PluginPriority Priority => PluginPriority.Default;
 #endif
-    public const string VersionName = "1.0.1";
+    public const string VersionName = "1.0.3";
     public static Scp3114Mods Singleton = null!;
 
     public Harmony Harmony { get; set; } = null!;
