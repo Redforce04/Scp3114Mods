@@ -21,7 +21,7 @@ namespace Scp3114Mods.Internal.Patches;
     nameof(InventorySystem.Items.Usables.UsableItemsController.ServerReceivedStatus))]
 internal static class UseGunPatch
 {
-    private static bool Debug => Scp3114Mods.Singleton.Config.Debug;
+    private static bool Debug => Config.Dbg;
 
     internal static void Postfix(NetworkConnection conn, StatusMessage msg)
     {
@@ -32,7 +32,7 @@ internal static class UseGunPatch
         catch (Exception e)
         {
             Log.Error("Scp3114Mods has caught an error at Fake Gun Use Patch.");
-            if (Scp3114Mods.Singleton.Config.Debug)
+            if (Config.Dbg)
             {
                 Log.Debug($"Exception: \n{e}");
             }

@@ -28,7 +28,7 @@ namespace Scp3114Mods.Internal.Patches;
 [HarmonyPatch(typeof(PlayerRoles.PlayableScps.Scp3114.Scp3114Strangle), nameof(PlayerRoles.PlayableScps.Scp3114.Scp3114Strangle.ProcessAttackRequest))]
 internal static class StranglePatch
 {
-	private static bool Debug => Scp3114Mods.Singleton.Config.Debug;
+	private static bool Debug => Config.Dbg;
 	internal static bool Prefix(Scp3114Strangle __instance, ref Scp3114Strangle.StrangleTarget? __result, NetworkReader reader)
 	{
 		try
@@ -41,15 +41,6 @@ internal static class StranglePatch
 				return true;
 			__result = null;
 			Player ply = Player.Get(__instance.Owner);
-			/*if (Scp3114Mods.Singleton.Config.StrangleCooldown > 0 && !Scp3114Mods.Singleton.PlayerCanStrangle(ply, out float cooldownRemaining))
-			{
-				ply.ReceiveHint(
-					$"You cannot strangle - your strangle is on cooldown.\nTry slashing instead.\nCooldown remaining: <b>{cooldownRemaining:0} seconds</b>",
-					5f);
-				if (Debug)
-					Log.Debug("Strangle Disabled. - Cooldown");
-				return false;
-			}*/
 
 			if (reader.Remaining == 0)
 			{
@@ -108,9 +99,9 @@ internal static class StranglePatch
 
 					hub.playerEffectsController.EnableEffect<Strangled>();
 					value = new Scp3114Strangle.StrangleTarget(hub, __instance.GetStranglePosition(target), __instance.ScpRole.FpcModule.Position);
-					__result = value;
-					if (Scp3114Mods.Singleton.Config is { StrangleCooldown: < 0, StranglePartialCooldown: <= 0 })
-						Scp3114Mods.Singleton.AddCooldownForPlayer(__instance);
+					__result = value; 
+					/*if (Scp3114Mods.Singleton.Config is { StrangleCooldown: < 0, StranglePartialCooldown: <= 0 })
+						Scp3114Mods.Singleton.AddCooldownForPlayer(__instance);*/
 					if (Debug) Log.Debug($"Player [{ply.Nickname}] Targeting Player {targetPly.Nickname}");
 				}
 			}

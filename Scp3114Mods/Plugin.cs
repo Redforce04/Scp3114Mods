@@ -47,7 +47,7 @@ public class Scp3114Mods : Plugin<Config>
     {
         
         Singleton = this;
-        Log.Info("Scp3114Mods has been initialized." + ( Config.Debug ? " [Debug]" : ""));
+        Log.Info("Scp3114Mods has been initialized." + ( Config.Dbg ? " [Debug]" : ""));
         Handlers = new EventHandlers();
         Harmony = new Harmony("me.redforce04.scp3114mods");
         if (!Config.IsEnabled)
@@ -87,7 +87,7 @@ public class Scp3114Mods : Plugin<Config>
             if (StrangleCooldownProcessor.IsRunning)
             {
                 Timing.KillCoroutines(StrangleCooldownProcessor);
-                if (Config.Debug)
+                if (Config.Dbg)
                     Log.Debug("Killed Cooldown Coroutine via coroutine kill");   
             }
         });
@@ -106,7 +106,7 @@ public class Scp3114Mods : Plugin<Config>
 
     private IEnumerator<float> ProcessStrangleCooldowns()
     {
-        if (Config.Debug)
+        if (Config.Dbg)
             Log.Debug("Running Cooldown Coroutine");
         List<Scp3114Strangle> stranglesToRemove = new List<Scp3114Strangle>();
         while (!_killCoroutine)
@@ -131,7 +131,7 @@ public class Scp3114Mods : Plugin<Config>
                         float amount = Config.StranglePartialCooldown;
                         if (strangle.Cooldown.Remaining < amount)
                         {
-                            if(Config.Debug) Log.Debug("Partial Strangle Finished. Adding cooldown.");
+                            if(Config.Dbg) Log.Debug("Partial Strangle Finished. Adding cooldown.");
                             strangle.Cooldown.Trigger(amount);
                         }
                         stranglesToRemove.Add(strangle);
@@ -147,7 +147,7 @@ public class Scp3114Mods : Plugin<Config>
             catch (Exception e)
             {
                 Log.Error("Scp3114Mods has caught an error at UpdateCooldowns");
-                if (Scp3114Mods.Singleton.Config.Debug)
+                if (Config.Dbg)
                 {
                     Log.Debug($"Exception: \n{e}");
                 }
@@ -156,7 +156,7 @@ public class Scp3114Mods : Plugin<Config>
             yield return Timing.WaitForSeconds(1f);
         }
             
-        if (Config.Debug)
+        if (Config.Dbg)
             Log.Debug("Killed Cooldown Coroutine via bool");
     }
 }

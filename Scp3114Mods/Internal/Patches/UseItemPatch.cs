@@ -23,7 +23,7 @@ namespace Scp3114Mods.Internal.Patches;
 [HarmonyPatch(typeof(InventorySystem.Items.Usables.UsableItemsController), nameof(InventorySystem.Items.Usables.UsableItemsController.ServerReceivedStatus))]
 internal class UseItemPatch
 {
-    private static bool Debug => Scp3114Mods.Singleton.Config.Debug;
+    private static bool Debug => Config.Dbg;
     internal static void Postfix(NetworkConnection conn, StatusMessage msg)
     {
         try
@@ -62,7 +62,7 @@ internal class UseItemPatch
         catch (Exception e)
         {
             Log.Error("Scp3114Mods has caught an error at Fake Item Use Patch.");
-            if (Scp3114Mods.Singleton.Config.Debug)
+            if (Config.Dbg)
             {
                 Log.Debug($"Exception: \n{e}");
             }

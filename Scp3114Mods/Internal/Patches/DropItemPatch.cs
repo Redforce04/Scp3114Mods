@@ -28,7 +28,7 @@ internal class DropItemPatch
         Player ply = Player.Get(__instance._hub);
         if (ply.Role != RoleTypeId.Scp3114)
             return true;
-
+        
         Scp3114Mods.Singleton.Handlers.OnPlayerThrowItem(ply, itemSerial, tryThrow);
         return false;
     }

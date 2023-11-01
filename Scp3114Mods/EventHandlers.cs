@@ -16,6 +16,7 @@ using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Attachments;
 using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Usables;
+using MEC;
 using PlayerRoles;
 using PlayerRoles.PlayableScps.Scp3114;
 using PluginAPI.Core;
@@ -71,15 +72,16 @@ public class EventHandlers
             return;
         try
         {
+            if (Config.Dbg) Log.Debug("Scp 3114 processing actions");
             if(Scp3114Mods.Singleton.Config.DisguiseDuration != 0)
-                ev.Player.SetDisguisePermanentDuration(Scp3114Mods.Singleton.Config.DisguiseDuration == -1 ? float.MaxValue : Scp3114Mods.Singleton.Config.DisguiseDuration);
+                Timing.CallDelayed(.1f, () => ev.Player.SetDisguisePermanentDuration(Scp3114Mods.Singleton.Config.DisguiseDuration == -1 ? float.MaxValue : Scp3114Mods.Singleton.Config.DisguiseDuration));
             if(Scp3114Mods.Singleton.Config.StartInDisguiseOfSelf)
-                ev.Player.SetDisguise(ev.Player.Nickname, UnityEngine.Random.Range(0, 4) == 1 ? RoleTypeId.Scientist : RoleTypeId.ClassD);
+                Timing.CallDelayed(.1f, () => ev.Player.SetDisguise(ev.Player.Nickname, UnityEngine.Random.Range(0, 4) == 1 ? RoleTypeId.Scientist : RoleTypeId.ClassD));
         }
         catch (Exception e)
         {
             Log.Warning("Could not give player a disguise of themself.");
-            if(Scp3114Mods.Singleton.Config.Debug) Log.Debug($"Exception: \n{e}");
+            if(Config.Dbg) Log.Debug($"Exception: \n{e}");
         }
     }
 
@@ -95,7 +97,7 @@ public class EventHandlers
             if (item is Firearm firearm)
             {
                 if (firearm.Status.Ammo == 0)
-                    processDryFiring(firearm);
+                    processDryFiring(firearm, ply);
                 else
                     processFiring(firearm);
             }
@@ -106,27 +108,30 @@ public class EventHandlers
         return;
     }
 
-    private void processDryFiring(Firearm firearm)
+    private void processDryFiring(Firearm firearm, Player sender)
     {
-        if (Scp3114Mods.Singleton.Config.Debug)
+        if (Config.Dbg)
             Log.Debug("Fake dry firing gun.");
         // Dry Fire
         switch (firearm.ActionModule)
         {
             case AutomaticAction automatic:
+                sender.ReferenceHub.networkIdentity.connectionToClient.Send<GunAudioMessage>(new GunAudioMessage(ReferenceHub._hostHub, automatic._dryfireClip, 10, sender.ReferenceHub));
                 firearm.ServerSendAudioMessage((byte)(automatic)._dryfireClip);
                 break;
             case PumpAction pump:
+                sender.ReferenceHub.networkIdentity.connectionToClient.Send<GunAudioMessage>(new GunAudioMessage(ReferenceHub._hostHub, (byte)pump._dryfireClip, 10, sender.ReferenceHub));
                 firearm.ServerSendAudioMessage((byte)(pump)._dryfireClip);
                 break;
             case DoubleAction doubleAction:
+                sender.ReferenceHub.networkIdentity.connectionToClient.Send<GunAudioMessage>(new GunAudioMessage(ReferenceHub._hostHub, doubleAction._dryfireClip, 10, sender.ReferenceHub));
                 firearm.ServerSendAudioMessage((byte)(doubleAction)._dryfireClip);
                 break;
         }
     }
     private void processFiring(Firearm firearm)
     {
-        if (Scp3114Mods.Singleton.Config.Debug)
+        if (Config.Dbg)
             Log.Debug("Fake firing gun.");
         switch (firearm.ActionModule)
         {
@@ -173,6 +178,7 @@ public class EventHandlers
                 pump._lastShotStopwatch.Restart();
             }
             firearm.Status = new FirearmStatus((byte)(firearm.Status.Ammo - 1), firearm.Status.Flags, firearm.Status.Attachments);
+            firearm.Owner.networkIdentity.connectionToClient.Send<GunAudioMessage>(new GunAudioMessage(ReferenceHub._hostHub, (byte) (pump.ShotSoundId + pump.ChamberedRounds), 10, firearm.Owner));
             firearm.ServerSendAudioMessage((byte)(pump.ShotSoundId + pump.ChamberedRounds));
             firearm.ServerSideAnimator.Play(FirearmAnimatorHashes.Fire);
             if (pump.ChamberedRounds == 0 && firearm.Status.Ammo > 0 && !firearm.IsLocalPlayer)
@@ -197,6 +203,7 @@ public class EventHandlers
             } 
             doubleA._nextAllowedShot = Time.timeSinceLevelLoad + doubleA._cooldownAfterShot;
             firearm.ServerSendAudioMessage((byte)firearm.AttachmentsValue(AttachmentParam.ShotClipIdOverride));
+            firearm.Owner.networkIdentity.connectionToClient.Send<GunAudioMessage>(new GunAudioMessage(ReferenceHub._hostHub, (byte)firearm.AttachmentsValue(AttachmentParam.ShotClipIdOverride), 10, firearm.Owner));
             firearm.ServerSideAnimator.Play(FirearmAnimatorHashes.Fire);
             return;
         }
@@ -228,6 +235,7 @@ public class EventHandlers
         }
 
         firearm.ServerSendAudioMessage(automatic.ShotClipId);
+            firearm.Owner.networkIdentity.connectionToClient.Send<GunAudioMessage>(new GunAudioMessage(ReferenceHub._hostHub, (byte)automatic.ShotClipId, 10, firearm.Owner));
         firearm.ServerSideAnimator.Play(FirearmAnimatorHashes.Fire);
         return;
     }
@@ -247,6 +255,7 @@ public class EventHandlers
         firearm.Status = new FirearmStatus((byte)(firearm.Status.Ammo - 1), firearm.Status.Flags,
             firearm.Status.Attachments);
         firearm.ServerSendAudioMessage(0);
+            firearm.Owner.networkIdentity.connectionToClient.Send<GunAudioMessage>(new GunAudioMessage(ReferenceHub._hostHub, (byte)0, 10, firearm.Owner));
         if (!firearm.IsLocalPlayer)
             disruptor._lastShotTime = disruptor.CurTime;
         firearm.ServerSideAnimator.Play(FirearmAnimatorHashes.Fire, 0, disruptor.ShotDelay / 2.2667f);

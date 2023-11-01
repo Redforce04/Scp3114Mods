@@ -11,6 +11,7 @@
 // -----------------------------------------
 
 using System.ComponentModel;
+using YamlDotNet.Serialization;
 
 namespace Scp3114Mods;
 
@@ -20,9 +21,12 @@ public class Config
 public class Config : Exiled.API.Interfaces.IConfig
 #endif
 {
+    [YamlIgnore]
+    public static bool Dbg => Scp3114Mods.Singleton.Config.Debug;
+    
     [Description("Determines whether the plugin is enabled or not.")]
     public bool IsEnabled { get; set; } = true;
-    
+
     [Description("Should debug logs be shown.")]
     public bool Debug { get; set; } = false;
     
@@ -91,7 +95,7 @@ public class Config : Exiled.API.Interfaces.IConfig
     [Description("How long shoud disguises last before being destroyed. -1 is infinite, and 0 is game default.")]
     public float DisguiseDuration { get; set; } = 0;
 
-    [Description("How long the cooldown between new disguises lasts. -1 is game default.")]
+    [Description("How long the cooldown between new disguises lasts. 0 disabled.")]
     public float DisguiseCooldown { get; set; } = -1;
     
     [Description("How long the cooldown after a failed disguis lasts. -1 is game default.")]

@@ -21,22 +21,22 @@ namespace Scp3114Mods.Internal.Commands;
 
 [CommandHandler(typeof(ClientCommandHandler))]
 [CommandHandler(typeof(RemoteAdminCommandHandler))]
-public class Dance : ICommand, IUsageProvider
+public class TalkCommand : ICommand, IUsageProvider
 {
-    public string Command => "dance";
-    public string[] Aliases => new [] { "d" };
-    public string Description => "Makes a player dance.";
-    public string[] Usage => new[] { "Player*", "Dance Number*" };
+    public string Command => "talk";
+    public string[] Aliases => new [] { "t", "say" };
+    public string Description => "Makes a player say a voiceline.";
+    public string[] Usage => new[] { "Player*", "Voiceline Number*" };
     public bool Execute(ArraySegment<string> arguments, ICommandSender sender, [UnscopedRef] out string response)
     {
         bool isSelf = true;
         var ply = Player.Get(sender);
         int danceNum = 0;
-        if (sender is PlayerCommandSender && arguments.Count > 0)
+        if (arguments.Count > 1)
         {
             if (arguments.Count > 1 && !int.TryParse(arguments.At(1), out danceNum))
             {
-                response = $"Could not parse dance number from \"{arguments.At(1)}\".";
+                response = $"Could not parse voice line number from \"{arguments.At(1)}\".";
                 return false;
             }
             if (!sender.CheckPermission(PlayerPermissions.GivingItems))
@@ -64,7 +64,7 @@ public class Dance : ICommand, IUsageProvider
         {
             if (arguments.Count > 0 && !int.TryParse(arguments.At(0), out danceNum))
             {
-                response = $"Could not parse dance number from \"{arguments.At(0)}\".";
+                response = $"Could not parse voice line number from \"{arguments.At(0)}\".";
                 return false;
             }
         }
@@ -78,39 +78,30 @@ public class Dance : ICommand, IUsageProvider
         {
             if (ply.RoleBase is not Scp3114Role role)
             {
-                Log.Warning("[Dance] Player was not Scp3114Role!");
-                response = $"Could not make {(isSelf ? "you" : $"player {ply.Nickname}")} dance due to an error.";
+                Log.Warning("[Talk] Player was not Scp3114Role!");
+                response = $"Could not make {(isSelf ? "you" : $"player {ply.Nickname}")} talk due to an error.";
                 return false;
             }
 
-            if (!role.SubroutineModule.TryGetSubroutine<Scp3114Dance>(out var dance) || dance is null)
+            if (!role.SubroutineModule.TryGetSubroutine<Scp3114VoiceLines>(out var voice) || voice is null)
             {
-                Log.Warning("[Dance] Dance Module was not found!");
-                response = $"Could not make {(isSelf ? "you" : $"player {ply.Nickname}")} dance due to an error.";
+                Log.Warning("[Talk] Talk Module was not found!");
+                response = $"Could not make {(isSelf ? "you" : $"player {ply.Nickname}")} talk due to an error.";
                 return false;
             }
-
-            if (dance.IsDancing)
-            {
-                response = $"{(isSelf ? "You" : $"Player {ply.Nickname}")} is already dancing.";
-                return false;
-            }
-
-            dance.DanceVariant = danceNum;
-            dance.IsDancing = true;
-            dance._serverStartPos = new(ply.Position);
-            dance.ServerSendRpc(true);
-            response = $"{(isSelf ? "You" : $"Player {ply.Nickname}")} is now dancing.";
+            // voice.
+            
+            response = $"{(isSelf ? "You" : $"Player {ply.Nickname}")} is now talking.";
         }
         catch (Exception e)
         {
-            response = $"Could not make {(isSelf ? "you" : $"player {ply.Nickname}")} dance due to an error.";
-            Log.Warning($"The dance command has caught an error.");
+            response = $"Could not make {(isSelf ? "you" : $"player {ply.Nickname}")} talk due to an error.";
+            Log.Warning($"The talk command has caught an error.");
             if(Config.Dbg)Log.Debug($"Exception: \n{e}");
             return false;
         }
 
-        response = $"{(isSelf ? $"You" : $"Player {ply.Nickname}")} is now dancing.";
+        response = $"{(isSelf ? $"You" : $"Player {ply.Nickname}")} is now talking.";
         return true;
     }
 
