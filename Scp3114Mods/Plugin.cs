@@ -19,7 +19,7 @@ namespace Scp3114Mods;
 public class Scp3114Mods
 {
 #else
-public class Scp3114Mods : Plugin<Config>
+public class Scp3114Mods : Plugin<Config, Translations>
 {
     public override string Author => "Redforce04";
     public override string Name => "Scp3114Mods";
@@ -28,24 +28,27 @@ public class Scp3114Mods : Plugin<Config>
     public override PluginPriority Priority => PluginPriority.Default;
 #endif
     public const string VersionName = "1.0.1";
-    public static Scp3114Mods Singleton;
+    public static Scp3114Mods Singleton = null!;
+
+    public Harmony Harmony { get; set; } = null!;
+
+    public EventHandlers Handlers { get; set; } = null!;
     
-    public Harmony Harmony { get; set; }
-    
-    public EventHandlers Handlers { get; set; }
-    
+#if !EXILED
+    [PluginConfig] 
+    public Translations Translation;
+
     [PluginConfig]
-    public Config Config;
+    public Config Config = null!;
+#endif
     public bool EventsRegistered { get; set; } = false;
     internal void _clearCooldownList() => _scp3114Strangles.Clear();
-
-    private CoroutineHandle StrangleCooldownProcessor;
-    private bool _killCoroutine;
-
+    
+#if !EXILED
     [PluginEntryPoint("Scp3114Mods", VersionName, "Modifies the mechanics of Scp3114 to be more balanced.", "Redforce04")]
+#endif
     public void OnStart()
     {
-        
         Singleton = this;
         Log.Info("Scp3114Mods has been initialized." + ( Config.Dbg ? " [Debug]" : ""));
         Handlers = new EventHandlers();
@@ -58,16 +61,15 @@ public class Scp3114Mods : Plugin<Config>
     internal void RegisterEvents()
     {
         EventsRegistered = true;
-        _killCoroutine = false;
+        
+        API.Events.StranglingPlayer += Handlers.OnStranglingPlayer;
         EventManager.RegisterEvents(Handlers);
         Harmony.PatchAll();
-        if (Config.StrangleCooldown > -1)
-        {
-            StrangleCooldownProcessor = Timing.RunCoroutine(ProcessStrangleCooldowns(),"StrangleCooldownProcessor");
-        }
     }
 
+#if !EXILED
     [PluginUnload]
+#endif
     public void OnStop()
     {
         UnregisterEvents();
@@ -79,18 +81,9 @@ public class Scp3114Mods : Plugin<Config>
 
     internal void UnregisterEvents()
     {
-        _killCoroutine = true;
         Harmony.UnpatchAll();
+        API.Events.StranglingPlayer -= Handlers.OnStranglingPlayer;
         EventManager.UnregisterEvents(Handlers);
-        Timing.CallDelayed(1f, () =>
-        {
-            if (StrangleCooldownProcessor.IsRunning)
-            {
-                Timing.KillCoroutines(StrangleCooldownProcessor);
-                if (Config.Dbg)
-                    Log.Debug("Killed Cooldown Coroutine via coroutine kill");   
-            }
-        });
         EventsRegistered = false;
     }
     private List<Scp3114Strangle> _scp3114Strangles { get; set; } = new List<Scp3114Strangle >();
@@ -100,63 +93,5 @@ public class Scp3114Mods : Plugin<Config>
         if (_scp3114Strangles.Contains(strangle))
             return;
         _scp3114Strangles.Add(strangle);
-    }
-
-
-
-    private IEnumerator<float> ProcessStrangleCooldowns()
-    {
-        if (Config.Dbg)
-            Log.Debug("Running Cooldown Coroutine");
-        List<Scp3114Strangle> stranglesToRemove = new List<Scp3114Strangle>();
-        while (!_killCoroutine)
-        {
-            if (Config.StranglePartialCooldown <= 0)
-            {
-                yield return Timing.WaitForSeconds(60);
-                continue;
-            }
-            try
-            {
-                for (int i = 0; i < _scp3114Strangles.Count(); i++)
-                {
-                    var strangle = _scp3114Strangles[i];
-                    if (strangle is null)
-                    {
-                        continue;
-                    }
-
-                    if (strangle.SyncTarget is null)
-                    {
-                        float amount = Config.StranglePartialCooldown;
-                        if (strangle.Cooldown.Remaining < amount)
-                        {
-                            if(Config.Dbg) Log.Debug("Partial Strangle Finished. Adding cooldown.");
-                            strangle.Cooldown.Trigger(amount);
-                        }
-                        stranglesToRemove.Add(strangle);
-                    }
-                }
-
-                foreach (var itemToRemove in stranglesToRemove)
-                {
-                    _scp3114Strangles.Remove(itemToRemove);
-                }
-                stranglesToRemove.Clear();
-            }
-            catch (Exception e)
-            {
-                Log.Error("Scp3114Mods has caught an error at UpdateCooldowns");
-                if (Config.Dbg)
-                {
-                    Log.Debug($"Exception: \n{e}");
-                }
-            }
-
-            yield return Timing.WaitForSeconds(1f);
-        }
-            
-        if (Config.Dbg)
-            Log.Debug("Killed Cooldown Coroutine via bool");
     }
 }

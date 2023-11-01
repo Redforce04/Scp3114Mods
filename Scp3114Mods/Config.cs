@@ -29,7 +29,10 @@ public class Config : Exiled.API.Interfaces.IConfig
 
     [Description("Should debug logs be shown.")]
     public bool Debug { get; set; } = false;
-    
+
+    [Description("If true, players will be notified of gameplay mechanics with hints. If false, broadcasts will be used.")]
+    public bool UseHintsInsteadOfBroadcasts { get; set; } = true;
+
     [Description("Plays a fake sound and visual effect to all players when scp3114 \"uses\" an item.")]
     public bool FakeUsableInteractions { get; set; } = true;
 
@@ -101,5 +104,19 @@ public class Config : Exiled.API.Interfaces.IConfig
     [Description("How long the cooldown after a failed disguis lasts. -1 is game default.")]
     public float DisguiseFailedCooldown { get; set; } = -1;
 
+    [Description("If set to true, players will be pulled from the human pool (default game). Otherwise, players are pulled from scps.")]
+    public bool SpawnFromHumanRoles { get; set; } = true;
+
+    [Description("Percent of Scp3114 spawning in general. Only applies if SpawnFromHumanRoles is enabled. Set to 100 to guarantee at least one scp3114 spawn. if 50/50, half of games won't spawn scp3114.")]
+    public int SpawnChance { get; set; } = 10;
+    
+    [Description("Percent of players to spawn as Scp3114. Ex: 10% of alive human players will become 3114 (if SpawnFromHumanRoles is enabled) or there is a 10% chance of and scp starting as 3114")]
+    public int PercentOfPlayers { get; set; } = 10;
+
+    [Description("How many players can be spawned as scp3114.")]
+    public int MinimumScp3114Count { get; set; } = 1;
+
+    [Description("How many players can be spawned as scp3114.")]
+    public int MaximumScp3114Count { get; set; } = 1;
 
 }

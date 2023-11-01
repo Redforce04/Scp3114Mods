@@ -20,19 +20,19 @@ using Utils.Networking;
 
 namespace Scp3114Mods.Internal.Patches;
 
+/// <summary>
+/// Processes fake item usage.
+/// </summary>
 [HarmonyPatch(typeof(InventorySystem.Items.Usables.UsableItemsController), nameof(InventorySystem.Items.Usables.UsableItemsController.ServerReceivedStatus))]
 internal class UseItemPatch
 {
-    private static bool Debug => Config.Dbg;
-    internal static void Postfix(NetworkConnection conn, StatusMessage msg)
+    private static void Postfix(NetworkConnection conn, StatusMessage msg)
     {
         try
         {
-
             if (!Scp3114Mods.Singleton.Config.FakeUsableInteractions)
                 return;
-            if (Debug)
-                Log.Debug($"Fake Usable Interaction Triggered.");
+            if (Config.Dbg) Log.Debug($"Fake Usable Interaction Triggered.");
             Player ply = Player.Get(conn.identity);
             if (ply is null || !(ply.ReferenceHub.inventory.CurInstance is UsableItem usableItem) ||
                 usableItem.ItemSerial != msg.ItemSerial)
@@ -44,17 +44,14 @@ internal class UseItemPatch
                 return;
             if (msg.Status == StatusMessage.StatusType.Cancel)
             {
-                if (Debug)
-                    Log.Debug("Sending Fake Usable Interaction.");
+                if (Config.Dbg) Log.Debug("Sending Fake Usable Interaction.");
                 new StatusMessage(StatusMessage.StatusType.Start, msg.ItemSerial).SendToAuthenticated();
                 if (Scp3114Mods.Singleton.Config.AutohideItemAfterFakeUse)
                 {
                     Timing.CallDelayed(usableItem.UseTime, () =>
                     {
                         ply.CurrentItem = null;
-                        if (Debug)
-                            Log.Debug("Hiding Item for Fake Use.");
-
+                        if (Config.Dbg) Log.Debug("Hiding Item for Fake Use.");
                     });
                 }
             }
@@ -62,10 +59,7 @@ internal class UseItemPatch
         catch (Exception e)
         {
             Log.Error("Scp3114Mods has caught an error at Fake Item Use Patch.");
-            if (Config.Dbg)
-            {
-                Log.Debug($"Exception: \n{e}");
-            }
+            if (Config.Dbg) Log.Debug($"Exception: \n{e}");
             return;
         }
     }

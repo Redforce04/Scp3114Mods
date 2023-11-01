@@ -16,9 +16,15 @@ using PlayerStatsSystem;
 
 namespace Scp3114Mods.Internal.Patches;
 
+/// <summary>
+/// Cooldown patch for strangle kills.
+/// </summary>
 [HarmonyPatch(typeof(Scp3114Strangle), nameof(Scp3114Strangle.OnAnyPlayerDied))]
 internal static class StrangleKillPatch
 {
+    /// <summary>
+    /// Triggers a cooldown when scp3114 kills a player. Thanks Sr. Licht!
+    /// </summary>
     private static void Postfix(Scp3114Strangle __instance, ReferenceHub deadPly, DamageHandlerBase handler)
     {
         if (Scp3114Mods.Singleton.Config.StrangleCooldown <= 0)

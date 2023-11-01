@@ -16,9 +16,18 @@ using PluginAPI.Core;
 
 namespace Scp3114Mods.Internal.Patches;
 
+/// <summary>
+/// Patches for the Disguise Progress Set.
+/// </summary>
 [HarmonyPatch(typeof(Scp3114Disguise), nameof(Scp3114Disguise.OnProgressSet))]
 internal static class DisguiseProgressSetPatch
 {
+    
+    /// <summary>
+    /// Prefix patch to replace the original OnProgressSet.
+    /// This may be better as a postfix or transpiler but it would require extra work.
+    /// I believe a postfix would require clearing the cooldown, and re-triggering it which may break things. 
+    /// </summary>
     private static bool Prefix(Scp3114Disguise __instance)
     {
         //__instance.OnProgressSet();

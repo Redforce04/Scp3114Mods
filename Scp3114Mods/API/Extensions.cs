@@ -25,6 +25,49 @@ namespace Scp3114Mods.API;
 
 public static class Extensions
 {
+    /// <summary>
+    /// Checks to see if a player is "innocent".
+    /// </summary>
+    /// <param name="ply">The <see cref="Player"/> to check.</param>
+    /// <returns>True if the player is innocent, False if the player is not innocent.</returns>
+    public static bool IsPlayerInnocent(this Player ply)
+    {
+
+        if (ply.Role != RoleTypeId.Scientist && ply.Role != RoleTypeId.ClassD)
+        {
+            if(Config.Dbg) Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [role]");
+            return false;
+        }
+        if (ply.Items.Any(x =>
+            {
+                if (x is Firearm)
+                {
+                    if(Config.Dbg) Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [Firearm]");
+                    return true;
+                }
+
+                if (x.ItemTypeId is ItemType.GrenadeFlash or ItemType.GrenadeHE or ItemType.SCP018)
+                {
+                    if(Config.Dbg) Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [Throwable]");
+                    return true;
+                }
+
+                if (Scp3114Mods.Singleton.Config.CandyLosesInnocence && x.ItemTypeId == ItemType.SCP330)
+                {
+                    if(Config.Dbg) Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [Candy]");
+                    return true;
+                }
+			    
+                return false;
+            }))
+        {
+            if(Config.Dbg) Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [items]");
+            return false;
+        }
+        if(Config.Dbg) Log.Debug($"IsPlayerInnocent {ply.Nickname} - true");
+        return true;
+    }
+    
     public static BasicRagdoll GetRagdoll(this RoleTypeId role, string name, bool spawn = true, Vector3? pos = null, Vector3? rot = null, ReferenceHub? hub = null)
     {
         if (!PlayerRoleLoader.TryGetRoleTemplate(role, out PlayerRoleBase rolebase) || rolebase is not IRagdollRole ragdoll)
@@ -69,7 +112,7 @@ public static class Extensions
 
         return true;
     }
-
+    // Untested
     public static bool SetDisguiseUnitId(this Player ply, byte unitId)
     {
         if (ply.RoleBase is not Scp3114Role role)
@@ -82,6 +125,7 @@ public static class Extensions
         return true;
     }
     
+    // This only kinda works...
     public static bool SetDisguiseRole(this Player ply, RoleTypeId newRole)
     {
         

@@ -18,12 +18,14 @@ using InventorySystem.Items.Firearms.Modules;
 using InventorySystem.Items.Usables;
 using MEC;
 using PlayerRoles;
+using PlayerRoles.PlayableScps.Scp049;
 using PlayerRoles.PlayableScps.Scp3114;
 using PluginAPI.Core;
 using PluginAPI.Core.Attributes;
 using PluginAPI.Enums;
 using PluginAPI.Events;
 using Scp3114Mods.API;
+using Scp3114Mods.API.EventArgs;
 using UnityEngine;
 
 namespace Scp3114Mods;
@@ -59,11 +61,13 @@ public class EventHandlers
             Log.Debug("An error has occured.");
         }
     }
+    
     [PluginEvent(ServerEventType.RoundStart)]
     internal void OnRoundStart()
     {
         Scp3114Mods.Singleton._clearCooldownList();
     }
+    
 
     [PluginEvent(ServerEventType.PlayerChangeRole)]
     internal void OnRoleChange(PlayerChangeRoleEvent ev)
@@ -98,198 +102,119 @@ public class EventHandlers
         }
     }
 
-    public void OnPlayerThrowItem(Player ply , ushort itemSerial, bool tryThrow)
+
+    public void OnStranglingPlayer(StranglingPlayerArgs ev)
+    {
+        if (Scp3114Mods.Singleton.Config.CanTutorialsBeStrangled && ev.Target.Role == RoleTypeId.Tutorial)
+        {
+            if (Config.Dbg) Log.Debug("Strangle Disabled. - Tutorial");
+            _sendMessage(ev.Attacker, Scp3114Mods.Singleton.Translation.CannotStrangleTutorials, 5f);
+            ev.IsAllowed = false;
+            return;
+        }
+        
+        // is player innocent?
+        if (!Scp3114Mods.Singleton.Config.AllowStranglingInnocents && ev.Target.IsPlayerInnocent())
+        {
+            if (Config.Dbg) Log.Debug("Strangle Disabled. - Innocent");
+
+            _sendMessage(ev.Attacker, Scp3114Mods.Singleton.Translation.CannotStrangleInnocentPlayer, 5f);
+            ev.IsAllowed = false;
+            return;
+        }
+        
+        // Is the player is not holding an item or the item doesnt count as a strangle blocking item, skip. 
+        if (ev.Target.CurrentItem is null || Scp3114Mods.Singleton.Config.ItemsThatWontBlockStrangle.Contains(ev.Target.CurrentItem.ItemTypeId))
+            return;
+        
+        bool emptyHandAll = Scp3114Mods.Singleton.Config.RequireEmptyHandToStrangleAll;
+        bool emptyHandInnocent = Scp3114Mods.Singleton.Config.RequireEmptyHandToStrangleInnocents &&
+                                 ev.Target.IsPlayerInnocent();
+        if (!emptyHandAll && !emptyHandInnocent)
+            return;
+        
+        if (Config.Dbg) Log.Debug("Strangle Disabled. - Empty Hand");
+
+        _sendMessage(ev.Attacker, !emptyHandAll
+                ? Scp3114Mods.Singleton.Translation.CannotStrangleInnocentPlayerEmptyHand
+                : Scp3114Mods.Singleton.Translation.CannotStranglePlayerEmptyHand, 5f);
+        ev.IsAllowed = false;
+    }
+
+    private static void _sendMessage(Player ply, string message, float duration)
+    {
+        if (Scp3114Mods.Singleton.Config.UseHintsInsteadOfBroadcasts)
+        {
+            ply.ReceiveHint(message, duration);
+        }
+        else
+        {
+            ply.ClearBroadcasts();
+            ply.SendBroadcast(message, (ushort)duration);
+        }
+    }
+    public bool OnPlayerThrowItem(Player ply , ushort itemSerial, bool tryThrow)
     {
         if (!Scp3114Mods.Singleton.Config.FakeFiringAllowed)
-            return;
+            return true;
         if (ply.Role == RoleTypeId.Scp3114)
         {
             if (!ply.ReferenceHub.inventory.UserInventory.Items.ContainsKey(itemSerial))
-                return;
+                return true;
             var item = ply.ReferenceHub.inventory.UserInventory.Items[itemSerial];
             if (item is Firearm firearm)
             {
                 if (firearm.Status.Ammo == 0)
-                    processDryFiring(firearm, ply);
+                    _processDryFiring(firearm, ply);
                 else
-                    processFiring(firearm);
+                    _processFiring(firearm);
+                
+                return false;
             }
-            
-            return;
         }
 
-        return;
+        return true;
     }
-
-    private void processDryFiring(Firearm firearm, Player sender)
+    
+    
+    private void _processDryFiring(Firearm firearm, Player sender)
     {
-        if (Config.Dbg)
-            Log.Debug("Fake dry firing gun.");
+        if (Config.Dbg) Log.Debug("Fake dry firing gun.");
         // Dry Fire
         switch (firearm.ActionModule)
         {
             case AutomaticAction automatic:
                 firearm.ServerSendAudioMessage((byte)(automatic)._dryfireClip);
-                PlayGunshotForOwner(firearm, automatic._dryfireClip);
+                firearm.PlayGunshotForOwner(automatic._dryfireClip);
 
                 break;
             case PumpAction pump:
                 firearm.ServerSendAudioMessage((byte)(pump)._dryfireClip);
-                PlayGunshotForOwner(firearm, pump._dryfireClip);
+                firearm.PlayGunshotForOwner((byte)pump._dryfireClip);
                 break;
             case DoubleAction doubleAction:
                 firearm.ServerSendAudioMessage((byte)(doubleAction)._dryfireClip);
-                PlayGunshotForOwner(firearm, doubleAction._dryfireClip);
+                firearm.PlayGunshotForOwner(doubleAction._dryfireClip);
                 break;
         }
     }
-    private void processFiring(Firearm firearm)
+    private void _processFiring(Firearm firearm)
     {
-        if (Config.Dbg)
-            Log.Debug("Fake firing gun.");
+        if (Config.Dbg) Log.Debug("Fake firing gun.");
         switch (firearm.ActionModule)
         {
-            case AutomaticAction automatic:
-                _fakeFireAutomatic(firearm, automatic);
+            case AutomaticAction:
+                firearm.FakeFireAutomatic();
                 break;
-            case PumpAction pump:
-                _fakeFirePump(firearm, pump);
+            case PumpAction:
+                firearm.FakeFirePump();
                 break;
-            case DisruptorAction disruptor:
-                _fakeFireDisruptor(firearm, disruptor);
+            case DisruptorAction:
+                firearm.FakeFireDisruptor();
                 break;
-            case DoubleAction doubleAction:
-                _fakeFireDoubleAction(firearm, doubleAction);
+            case DoubleAction:
+                firearm.FakeFireDoubleAction();
                 break;
         }
-    }
-
-    private void _fakeFirePump(Firearm firearm, PumpAction pump)
-    {
-        if (firearm.Owner.HasBlock(BlockedInteraction.ItemPrimaryAction))
-        {
-            return;
-        }
-        if (pump.ChamberedRounds == 0 || firearm.Status.Ammo == 0)
-        {
-            pump.ServerResync();
-            return;
-        }
-        if (pump._lastShotStopwatch.Elapsed.TotalSeconds < (double)pump.TimeBetweenShots || pump._pumpStopwatch.Elapsed.TotalSeconds < (double)pump.PumpingTime)
-        {
-            return;
-        }
-        pump.LastFiredAmount = 0;
-        int num = pump.AmmoUsage;
-        while (num > 0 && pump.ChamberedRounds > 0 && pump._firearm.Status.Ammo > 0)
-        {
-            num--;
-            pump.ChamberedRounds--;
-            pump.CockedHammers--;
-            pump.LastFiredAmount++;
-            if (pump.ChamberedRounds > 0)
-            {
-                pump._lastShotStopwatch.Restart();
-            }
-
-            if (Scp3114Mods.Singleton.Config.FakeFiringUsesAmmo)
-            {
-                firearm.Status = new FirearmStatus((byte)(firearm.Status.Ammo - 1), firearm.Status.Flags, firearm.Status.Attachments);
-            }
-                
-            PlayGunshotForOwner(firearm, (byte)(pump.ShotSoundId + pump.ChamberedRounds));
-            firearm.ServerSendAudioMessage((byte)(pump.ShotSoundId + pump.ChamberedRounds));
-            firearm.ServerSideAnimator.Play(FirearmAnimatorHashes.Fire);
-            if (pump.ChamberedRounds == 0 && firearm.Status.Ammo > 0 && !firearm.IsLocalPlayer)
-            {
-                pump._pumpStopwatch.Restart();
-                firearm.AnimSetTrigger(pump._pumpAnimHash);
-                break;
-            }
-        }
-    }
-    private void _fakeFireDoubleAction(Firearm firearm, DoubleAction doubleA)
-    {
-        if (firearm.Owner.HasBlock(BlockedInteraction.ItemPrimaryAction))
-        {
-            return;
-        }
-        if ((doubleA.ServerTriggerReady || firearm.IsLocalPlayer) && firearm.Status.Ammo > 0)
-        {
-            if (Scp3114Mods.Singleton.Config.FakeFiringUsesAmmo)
-            {
-                firearm.Status = new FirearmStatus((byte)(firearm.Status.Ammo - 1), firearm.Status.Flags, firearm.Status.Attachments);
-            } 
-            doubleA._nextAllowedShot = Time.timeSinceLevelLoad + doubleA._cooldownAfterShot;
-            
-            PlayGunshotForOwner(firearm, (byte)firearm.AttachmentsValue(AttachmentParam.ShotClipIdOverride));
-            firearm.ServerSendAudioMessage((byte)firearm.AttachmentsValue(AttachmentParam.ShotClipIdOverride));
-            firearm.ServerSideAnimator.Play(FirearmAnimatorHashes.Fire);
-            return;
-        }
-    }
-
-    private void _fakeFireAutomatic(Firearm firearm, AutomaticAction automatic)
-    {
-        if (firearm.Owner.HasBlock(BlockedInteraction.ItemPrimaryAction))
-            return;
-        if (firearm.Status.Ammo < automatic._ammoConsumption)
-            return;
-        if (!automatic.ServerCheckFirerate())
-            return;
-        if (!automatic.ModulesReady)
-        {
-            firearm.Owner.gameConsoleTransmission.SendToClient(
-                $"Shot rejected, ammoManager={firearm.AmmoManagerModule.Standby}, equipperModule={firearm.EquipperModule.Standby}, adsModule={firearm.AdsModule.Standby}",
-                "gray");
-            return;
-        }
-
-        FirearmStatusFlags firearmStatusFlags = firearm.Status.Flags;
-        if (Scp3114Mods.Singleton.Config.FakeFiringUsesAmmo)
-        {
-            if (firearm.Status.Ammo - automatic._ammoConsumption < automatic._ammoConsumption &&
-                automatic._boltTravelTime == 0f)
-                firearmStatusFlags &= ~FirearmStatusFlags.Chambered;
-            firearm.Status = new FirearmStatus((byte)(firearm.Status.Ammo - automatic._ammoConsumption), firearmStatusFlags, firearm.Status.Attachments);
-        }
-
-        PlayGunshotForOwner(firearm);
-        firearm.ServerSendAudioMessage(automatic.ShotClipId);
-        firearm.ServerSideAnimator.Play(FirearmAnimatorHashes.Fire);
-        return;
-    }
-
-    private void _fakeFireDisruptor(Firearm firearm, DisruptorAction disruptor)
-    {
-        if (!firearm.IsLocalPlayer && disruptor.TimeSinceLastShot < 1.5f)
-            return;
-        if (!disruptor.ModulesReady)
-        {
-            firearm.Owner.gameConsoleTransmission.SendToClient(
-                $"Shot rejected, ammoManager={firearm.AmmoManagerModule.Standby}, equipperModule={firearm.EquipperModule.Standby}, adsModule={firearm.AdsModule.Standby}",
-                "gray");
-            return;
-        }
-
-        if (Scp3114Mods.Singleton.Config.FakeFiringUsesAmmo)
-        {
-            firearm.Status = new FirearmStatus((byte)(firearm.Status.Ammo - 1), firearm.Status.Flags, firearm.Status.Attachments);
-        }
-        firearm.ServerSendAudioMessage(0);
-        PlayGunshotForOwner(firearm);
-        if (!firearm.IsLocalPlayer)
-            disruptor._lastShotTime = disruptor.CurTime;
-        firearm.ServerSideAnimator.Play(FirearmAnimatorHashes.Fire, 0, disruptor.ShotDelay / 2.2667f);
-    }
-
-    private void PlayGunshotForOwner(Firearm firearm, int clipId = 0)
-    {
-        float num1 = firearm.AudioClips[clipId].HasFlag(FirearmAudioFlags.ScaleDistance) ? firearm.AudioClips[clipId].MaxDistance * firearm.AttachmentsValue(AttachmentParam.GunshotLoudnessMultiplier) : firearm.AudioClips[clipId].MaxDistance;
-        if (firearm.AudioClips[clipId].HasFlag(FirearmAudioFlags.IsGunshot) && (double) firearm.Owner.transform.position.y > 900.0)
-            num1 *= 2.3f;
-        float num2 = num1 * num1;
-        Player ply = Player.Get(firearm.Owner);
-        ply.PlayGunSound(firearm.ItemTypeId, (byte)(num2/255));
     }
 }
