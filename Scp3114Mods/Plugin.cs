@@ -10,6 +10,7 @@ using UnityEngine;
 using Debug = System.Diagnostics.Debug;
 using Log = PluginAPI.Core.Log;
 using PluginPriority = Exiled.API.Enums.PluginPriority;
+using PlayerRoles.RoleAssign;
 #if EXILED
 using Exiled.API.Features;
 using Exiled.API.Interfaces;
@@ -68,6 +69,9 @@ public class Scp3114Mods : Plugin<Config, Translations>
     internal void RegisterEvents()
     {
         EventsRegistered = true;
+
+        // UnRegister NWSpawnScp3114
+        RoleAssigner.OnPlayersSpawned -= Scp3114Spawner.OnPlayersSpawned;
         
         API.Events.StranglingPlayer += Handlers.OnStranglingPlayer;
         EventManager.RegisterEvents(Handlers);
