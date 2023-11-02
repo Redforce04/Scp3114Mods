@@ -34,7 +34,7 @@ internal class UseItemPatch
         {
             if (!Scp3114Mods.Singleton.Config.FakeUsableInteractions)
                 return;
-            if (Config.Dbg) Log.Debug($"Fake Usable Interaction Triggered.");
+            Logging.Debug($"Fake Usable Interaction Triggered.");
             Player ply = Player.Get(conn.identity);
             if (ply is null || !(ply.ReferenceHub.inventory.CurInstance is UsableItem usableItem) ||
                 usableItem.ItemSerial != msg.ItemSerial)
@@ -46,14 +46,14 @@ internal class UseItemPatch
                 return;
             if (msg.Status == StatusMessage.StatusType.Cancel)
             {
-                if (Config.Dbg) Log.Debug("Sending Fake Usable Interaction.");
+                Logging.Debug("Sending Fake Usable Interaction.");
                 new StatusMessage(StatusMessage.StatusType.Start, msg.ItemSerial).SendToAuthenticated();
                 if (Scp3114Mods.Singleton.Config.AutohideItemAfterFakeUse)
                 {
                     Timing.CallDelayed(usableItem.UseTime, () =>
                     {
                         ply.CurrentItem = null;
-                        if (Config.Dbg) Log.Debug("Hiding Item for Fake Use.");
+                        Logging.Debug("Hiding Item for Fake Use.");
                     });
                 }
                 else
@@ -72,8 +72,8 @@ internal class UseItemPatch
         }
         catch (Exception e)
         {
-            Log.Error("Scp3114Mods has caught an error at Fake Item Use Patch.");
-            if (Config.Dbg) Log.Debug($"Exception: \n{e}");
+            Logging.Error("Scp3114Mods has caught an error at Fake Item Use Patch.");
+            Logging.Debug($"Exception: \n{e}");
             return;
         }
     }

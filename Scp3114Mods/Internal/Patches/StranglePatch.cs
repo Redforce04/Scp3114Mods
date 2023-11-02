@@ -20,6 +20,7 @@ using PlayerRoles.FirstPersonControl;
 using PlayerRoles.PlayableScps.Scp3114;
 using PluginAPI.Core;
 using RelativePositioning;
+using Scp3114Mods.API;
 using Scp3114Mods.API.EventArgs;
 using UnityEngine;
 using Utils.Networking;
@@ -82,7 +83,7 @@ internal static class StranglePatch
 					hub.playerEffectsController.EnableEffect<Strangled>();
 					value = new Scp3114Strangle.StrangleTarget(hub, __instance.GetStranglePosition(target), __instance.ScpRole.FpcModule.Position);
 					__result = value; 
-					if (Config.Dbg) Log.Debug($"Player [{ply.Nickname}] Targeting Player {targetPly.Nickname}");
+					Logging.Debug($"Player [{ply.Nickname}] Targeting Player {targetPly.Nickname}");
 				}
 			}
 
@@ -92,8 +93,8 @@ internal static class StranglePatch
 		}
 		catch (Exception e)
 		{
-			Log.Error("Scp3114Mods has caught an error at Strangle Patch.");
-			if (Config.Dbg) Log.Debug($"Exception: \n{e}");
+			Logging.Error("Scp3114Mods has caught an error at Strangle Patch.");
+			Logging.Debug($"Exception: \n{e}");
 
 			return true;
 		}

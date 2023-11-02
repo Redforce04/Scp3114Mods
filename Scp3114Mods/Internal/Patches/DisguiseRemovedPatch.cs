@@ -31,7 +31,7 @@ internal static class DisguiseRemovedPatch
     {
         return;/*
         float cooldown = Scp3114Mods.Singleton.Config.DisguiseCooldown;
-        if (Config.Dbg) Log.Debug($"Processing Disguise Cooldown {cooldown}");
+        Logging.Debug($"Processing Disguise Cooldown {cooldown}");
         if (cooldown <= 0)
             return;
         if (__instance.Role is not Scp3114Role role)
@@ -40,6 +40,6 @@ internal static class DisguiseRemovedPatch
             return;
         
         disguise.Cooldown.Trigger(cooldown);
-        if (Config.Dbg) Log.Debug($"Disguise Cooldown Triggered {cooldown}");*/
+        Logging.Debug($"Disguise Cooldown Triggered {cooldown}");*/
     }
 }

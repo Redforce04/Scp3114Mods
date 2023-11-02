@@ -16,6 +16,7 @@ using PlayerRoles;
 using PlayerRoles.PlayableScps.Scp3114;
 using PluginAPI.Core;
 using RemoteAdmin;
+using Scp3114Mods.API;
 
 namespace Scp3114Mods.Internal.Commands;
 
@@ -93,14 +94,14 @@ public class TalkCommand : ICommand, IUsageProvider
         {
             if (ply.RoleBase is not Scp3114Role role)
             {
-                Log.Warning("[Talk] Player was not Scp3114Role!");
+                Logging.Warning("[Talk] Player was not Scp3114Role!");
                 response = $"Could not make {(isSelf ? "you" : $"player {ply.Nickname}")} talk due to an error.";
                 return false;
             }
 
             if (!role.SubroutineModule.TryGetSubroutine<Scp3114VoiceLines>(out var voice) || voice is null)
             {
-                Log.Warning("[Talk] Talk Module was not found!");
+                Logging.Warning("[Talk] Talk Module was not found!");
                 response = $"Could not make {(isSelf ? "you" : $"player {ply.Nickname}")} talk due to an error.";
                 return false;
             }
@@ -116,8 +117,8 @@ public class TalkCommand : ICommand, IUsageProvider
         catch (Exception e)
         {
             response = $"Could not make {(isSelf ? "you" : $"player {ply.Nickname}")} talk due to an error.";
-            Log.Warning($"The talk command has caught an error.");
-            if(Config.Dbg)Log.Debug($"Exception: \n{e}");
+            Logging.Warning($"The talk command has caught an error.");
+            Logging.Debug($"Exception: \n{e}");
             return false;
         }
 

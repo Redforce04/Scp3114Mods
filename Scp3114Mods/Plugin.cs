@@ -5,6 +5,7 @@ using PlayerRoles.PlayableScps.Scp3114;
 using PluginAPI.Core;
 using PluginAPI.Core.Attributes;
 using PluginAPI.Events;
+using Scp3114Mods.API;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
 using Log = PluginAPI.Core.Log;
@@ -53,7 +54,7 @@ public class Scp3114Mods : Plugin<Config, Translations>
     {
         Singleton = this;
 
-        Log.Info("Scp3114Mods has been initialized." + (Config.Dbg ? " [Debug]" : ""));
+        Logging.Info("Scp3114Mods has been initialized." + (Config.Dbg ? " [Debug]" : ""));
         Handlers = new EventHandlers();
         Harmony = new Harmony("me.redforce04.scp3114mods");
         if (!Config.IsEnabled)
@@ -92,5 +93,4 @@ public class Scp3114Mods : Plugin<Config, Translations>
         EventManager.UnregisterEvents(Handlers);
         EventsRegistered = false;
     }
-    
 }

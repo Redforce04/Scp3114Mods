@@ -46,7 +46,7 @@ internal static class DisguiseProgressSetPatch
             curIdentity.Status = Scp3114Identity.DisguiseStatus.None;
             if (Scp3114Mods.Singleton.Config.DisguiseFailedCooldown != 0)
                 __instance.Cooldown.Trigger(Scp3114Mods.Singleton.Config.DisguiseFailedCooldown == -1 ? __instance.Duration : Scp3114Mods.Singleton.Config.DisguiseFailedCooldown);
-            if (Config.Dbg) Log.Debug("Disguise Cooldown Triggered");
+            Logging.Debug("Disguise Cooldown Triggered");
         }
         return false;
         */

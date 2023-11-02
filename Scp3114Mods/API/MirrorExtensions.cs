@@ -316,7 +316,7 @@ namespace Scp3114Mods.API;
                 if (target != player || !isRisky)
                     target.Connection.Send(writer.ToArraySegment());
                 else
-                    Log.Error($"Prevent Seld-Desync of {player.Nickname} with {type}");
+                    Logging.Error($"Prevent Seld-Desync of {player.Nickname} with {type}");
             }
 
             NetworkWriterPool.Return(writer);

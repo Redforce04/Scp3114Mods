@@ -27,8 +27,8 @@ public class Events
         }
         catch (Exception e)
         {
-            Log.Warning($"An error has occured while invoking {action?.Method.Name}.");
-            if (Config.Dbg) Log.Debug($"Exceptions: \n{e}");
+            Logging.Warning($"An error has occured while invoking {action?.Method.Name}.");
+            Logging.Debug($"Exceptions: \n{e}");
         }
     }
 #endregion

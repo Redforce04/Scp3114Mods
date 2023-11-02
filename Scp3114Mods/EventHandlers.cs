@@ -60,7 +60,7 @@ public class EventHandlers
         }
         catch (Exception e)
         {
-            Log.Debug("An error has occured.");
+            Logging.Debug("An error has occured.");
         }
     }
     
@@ -93,7 +93,7 @@ public class EventHandlers
         // Check strangle cooldown.
         try
         {
-            if (Config.Dbg) Log.Debug("Scp 3114 processing actions");
+            Logging.Debug("Scp 3114 processing actions");
             if (Scp3114Mods.Singleton.Config.StranglePartialCooldown > 0)
             {
                 Timing.CallDelayed(.1f, () =>
@@ -113,8 +113,8 @@ public class EventHandlers
         }
         catch (Exception e)
         {
-            Log.Warning("Could not give player a disguise of themself.");
-            if(Config.Dbg) Log.Debug($"Exception: \n{e}");
+            Logging.Warning("Could not give player a disguise of themself.");
+            Logging.Debug($"Exception: \n{e}");
         }
     }
 
@@ -135,8 +135,8 @@ public class EventHandlers
         }
         catch (Exception e)
         {
-            Log.Warning($"Could not refresh spoofed info to player {updateFor.Nickname}.");
-            if (Config.Dbg) Log.Debug($"Exception: \n{e}");
+            Logging.Warning($"Could not refresh spoofed info to player {updateFor.Nickname}.");
+            Logging.Debug($"Exception: \n{e}");
         }
     }
     
@@ -167,8 +167,8 @@ public class EventHandlers
         }
         catch (Exception e)
         {
-            Log.Warning($"Could not send fake spectator info to player {spectator.Nickname}.");
-            if (Config.Dbg) Log.Debug($"Exception: \n{e}");
+            Logging.Warning($"Could not send fake spectator info to player {spectator.Nickname}.");
+            Logging.Debug($"Exception: \n{e}");
         }
     }
 
@@ -178,10 +178,10 @@ public class EventHandlers
     /// </summary>
     public void OnStranglingPlayer(StranglingPlayerArgs ev)
     {
-        if(Config.Dbg) Log.Debug($"Target Role: {ev.Target.Role}");
+        Logging.Debug($"Target Role: {ev.Target.Role}");
         if (Scp3114Mods.Singleton.Config.DisableTutorialsStrangling && ev.Target.Role == RoleTypeId.Tutorial)
         {
-            if (Config.Dbg) Log.Debug("Strangle Disabled. - Tutorial");
+            Logging.Debug("Strangle Disabled. - Tutorial");
             _sendMessage(ev.Attacker, Scp3114Mods.Singleton.Translation.CannotStrangleTutorials, 5f);
             ev.IsAllowed = false;
             return;
@@ -190,7 +190,7 @@ public class EventHandlers
         // is player innocent?
         if (!Scp3114Mods.Singleton.Config.AllowStranglingInnocents && ev.Target.IsPlayerInnocent())
         {
-            if (Config.Dbg) Log.Debug("Strangle Disabled. - Innocent");
+            Logging.Debug("Strangle Disabled. - Innocent");
 
             _sendMessage(ev.Attacker, Scp3114Mods.Singleton.Translation.CannotStrangleInnocentPlayer, 5f);
             ev.IsAllowed = false;
@@ -207,7 +207,7 @@ public class EventHandlers
         if (!emptyHandAll && !emptyHandInnocent)
             return;
         
-        if (Config.Dbg) Log.Debug("Strangle Disabled. - Empty Hand");
+        Logging.Debug("Strangle Disabled. - Empty Hand");
 
         _sendMessage(ev.Attacker, !emptyHandAll
                 ? Scp3114Mods.Singleton.Translation.CannotStrangleInnocentPlayerEmptyHand
@@ -258,7 +258,7 @@ public class EventHandlers
     /// </summary>
     private void _processDryFiring(Firearm firearm, Player sender)
     {
-        if (Config.Dbg) Log.Debug("Fake dry firing gun.");
+        Logging.Debug("Fake dry firing gun.");
         // Dry Fire
         switch (firearm.ActionModule)
         {
@@ -282,7 +282,7 @@ public class EventHandlers
     /// </summary>
     private void _processFiring(Firearm firearm)
     {
-        if (Config.Dbg) Log.Debug("Fake firing gun.");
+        Logging.Debug("Fake firing gun.");
         switch (firearm.ActionModule)
         {
             case AutomaticAction:

@@ -16,6 +16,7 @@ using PlayerRoles;
 using PlayerRoles.PlayableScps.Scp3114;
 using PluginAPI.Core;
 using RemoteAdmin;
+using Scp3114Mods.API;
 
 namespace Scp3114Mods.Internal.Commands;
 
@@ -78,14 +79,14 @@ public class Dance : ICommand, IUsageProvider
         {
             if (ply.RoleBase is not Scp3114Role role)
             {
-                Log.Warning("[Dance] Player was not Scp3114Role!");
+                Logging.Warning("[Dance] Player was not Scp3114Role!");
                 response = $"Could not make {(isSelf ? "you" : $"player {ply.Nickname}")} dance due to an error.";
                 return false;
             }
 
             if (!role.SubroutineModule.TryGetSubroutine<Scp3114Dance>(out var dance) || dance is null)
             {
-                Log.Warning("[Dance] Dance Module was not found!");
+                Logging.Warning("[Dance] Dance Module was not found!");
                 response = $"Could not make {(isSelf ? "you" : $"player {ply.Nickname}")} dance due to an error.";
                 return false;
             }
@@ -105,8 +106,8 @@ public class Dance : ICommand, IUsageProvider
         catch (Exception e)
         {
             response = $"Could not make {(isSelf ? "you" : $"player {ply.Nickname}")} dance due to an error.";
-            Log.Warning($"The dance command has caught an error.");
-            if(Config.Dbg)Log.Debug($"Exception: \n{e}");
+            Logging.Warning($"The dance command has caught an error.");
+            Logging.Debug($"Exception: \n{e}");
             return false;
         }
 

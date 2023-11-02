@@ -35,36 +35,36 @@ public static class Extensions
 
         if (ply.Role != RoleTypeId.Scientist && ply.Role != RoleTypeId.ClassD)
         {
-            if(Config.Dbg) Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [role]");
+            Logging.Debug($"IsPlayerInnocent {ply.Nickname} - false [role]");
             return false;
         }
         if (ply.Items.Any(x =>
             {
                 if (x is Firearm)
                 {
-                    if(Config.Dbg) Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [Firearm]");
+                    Logging.Debug($"IsPlayerInnocent {ply.Nickname} - false [Firearm]");
                     return true;
                 }
 
                 if (x.ItemTypeId is ItemType.GrenadeFlash or ItemType.GrenadeHE or ItemType.SCP018)
                 {
-                    if(Config.Dbg) Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [Throwable]");
+                    Logging.Debug($"IsPlayerInnocent {ply.Nickname} - false [Throwable]");
                     return true;
                 }
 
                 if (Scp3114Mods.Singleton.Config.CandyLosesInnocence && x.ItemTypeId == ItemType.SCP330)
                 {
-                    if(Config.Dbg) Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [Candy]");
+                    Logging.Debug($"IsPlayerInnocent {ply.Nickname} - false [Candy]");
                     return true;
                 }
 			    
                 return false;
             }))
         {
-            if(Config.Dbg) Log.Debug($"IsPlayerInnocent {ply.Nickname} - false [items]");
+            Logging.Debug($"IsPlayerInnocent {ply.Nickname} - false [items]");
             return false;
         }
-        if(Config.Dbg) Log.Debug($"IsPlayerInnocent {ply.Nickname} - true");
+        Logging.Debug($"IsPlayerInnocent {ply.Nickname} - true");
         return true;
     }
     
@@ -81,7 +81,7 @@ public static class Extensions
 
         if(spawn)
             NetworkServer.Spawn(gameObject);
-        if (Config.Dbg) Log.Debug("Ragdoll created");
+        Logging.Debug("Ragdoll created");
         return component;
     }
     public static bool SetDisguise(this Player ply, string name, RoleTypeId role) => SetDisguise(ply, role.GetRagdoll(name));
@@ -89,7 +89,7 @@ public static class Extensions
     {
         if (ragdoll is null)
         {
-            if (Config.Dbg) Log.Debug("Ragdoll is null.");
+            Logging.Debug("Ragdoll is null.");
             return false;
         }
         if (ply.RoleBase is not Scp3114Role role)
@@ -108,7 +108,7 @@ public static class Extensions
         disguise._identity.OnIdentityStatusChanged();
 
         
-        if (Config.Dbg) Log.Debug("Setting disguise");
+        Logging.Debug("Setting disguise");
 
         return true;
     }
@@ -140,7 +140,7 @@ public static class Extensions
         if (disguise.CurRagdoll is null || disguise._identity.CurIdentity.Status == Scp3114Identity.DisguiseStatus.None)
         {
             // try this but with a twist????????
-            if (Config.Dbg) Log.Debug("Creating new ragdoll.");
+            Logging.Debug("Creating new ragdoll.");
             var ragdoll = newRole.GetRagdoll(ply.Nickname);
             disguise.CurRagdoll = ragdoll;
             role.Ragdoll = ragdoll;
@@ -152,7 +152,7 @@ public static class Extensions
         {
             disguise._identity.CurIdentity.Status = Scp3114Identity.DisguiseStatus.None;
 
-            if (Config.Dbg) Log.Debug("Reusing ragdoll.");
+            Logging.Debug("Reusing ragdoll.");
             var data = (disguise.CurRagdoll.NetworkInfo);
             var ragdollData = new RagdollData(data.OwnerHub, data.Handler, newRole, data.StartPosition, data.StartRotation, data.Nickname, data.CreationTime);
             disguise.CurRagdoll.NetworkInfo = ragdollData;
@@ -177,7 +177,7 @@ public static class Extensions
         return true;
         //if (disguise.CurRagdoll is null || disguise._identity.CurIdentity.Status == Scp3114Identity.DisguiseStatus.None || !role.Disguised)
         //{
-            if (Config.Dbg) Log.Debug("Creating new ragdoll.");
+            Logging.Debug("Creating new ragdoll.");
             var ragdoll = ply.Role.GetRagdoll(name);
             disguise.CurRagdoll = ragdoll;
             role.Ragdoll = ragdoll;
@@ -186,7 +186,7 @@ public static class Extensions
         /*}
         else
         {
-            if (Config.Dbg) Log.Debug("Reusing ragdoll.");
+            Logging.Debug("Reusing ragdoll.");
             var data = (disguise.CurRagdoll.NetworkInfo);
             var info = new RagdollData(data.OwnerHub, data.Handler, data.RoleType, data.StartPosition, data.StartRotation, name, data.CreationTime);
             disguise.CurRagdoll.NetworkInfo = info;
@@ -217,7 +217,7 @@ public static class Extensions
             return false;
         if (!role.SubroutineModule.TryGetSubroutine<Scp3114Identity>(out var identity) || identity is null)
             return false;
-        if (Config.Dbg) Log.Debug("Setting Scp3114 Permanent Disguise");
+        Logging.Debug("Setting Scp3114 Permanent Disguise");
         identity._disguiseDurationSeconds = duration;
         identity.ServerResendIdentity();
         return true;
@@ -229,7 +229,7 @@ public static class Extensions
             return;
         if (!role.SubroutineModule.TryGetSubroutine<Scp3114Disguise>(out var disguise) || disguise is null)
             return;
-        if (Config.Dbg) Log.Debug("Removing Scp 3114 Disguise");
+        Logging.Debug("Removing Scp 3114 Disguise");
         disguise._identity.OnIdentityStatusChanged();
     }
 
@@ -241,7 +241,7 @@ public static class Extensions
             return;
         disguise.Cooldown.Clear();
         disguise.Cooldown.Trigger(cooldown);
-        if (Config.Dbg) Log.Debug("Triggering Cooldown for Disguise");
+        Logging.Debug("Triggering Cooldown for Disguise");
     }
     public static void TriggerStrangleCooldown(this Player ply, float cooldown)
     {
@@ -251,7 +251,7 @@ public static class Extensions
             return;
         strangle.Cooldown.Clear();
         strangle.Cooldown.Trigger(cooldown);
-        if (Config.Dbg) Log.Debug("Triggering Cooldown for Strangle");
+        Logging.Debug("Triggering Cooldown for Strangle");
     }
     public static void TriggerSlapCooldown(this Player ply, float cooldown)
     {
@@ -261,7 +261,7 @@ public static class Extensions
             return;
         slap.Cooldown.Clear();
         slap.Cooldown.Trigger(cooldown);
-        if (Config.Dbg) Log.Debug("Triggering Cooldown for Slap");
+        Logging.Debug("Triggering Cooldown for Slap");
     }
 
     /// <summary>

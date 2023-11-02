@@ -17,6 +17,7 @@ using PlayerRoles;
 using PlayerRoles.PlayableScps.Scp3114;
 using PlayerRoles.RoleAssign;
 using PluginAPI.Core;
+using Scp3114Mods.API;
 using static HarmonyLib.AccessTools;
 namespace Scp3114Mods.Internal.Patches;
 
@@ -26,7 +27,8 @@ internal static class DefaultGameSpawningPatch
     [HarmonyTranspiler]
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
-        if (Config.Dbg) Log.Debug($"Patching Transpiler Default GameSpawningPatch");
+     
+        Logging.Debug($"Patching Transpiler Default GameSpawningPatch");
             /*
             og //IL_0028: ldloca.s  keyValuePair
             og //IL_002A: call      instance !1 valuetype [mscorlib]System.Collections.Generic.KeyValuePair`2<valuetype PlayerRoles.RoleTypeId, class PlayerRoles.PlayerRoleBase>::get_Value()
@@ -68,7 +70,7 @@ internal static class DefaultGameSpawningPatch
                         // Move the old label on the remove brfalse -> first skip.
                         instruction.operand = newInstructions[z].operand;
                     }
-                    if (debug) Log.Debug(_getOpcodeDebugLabel(instruction, z, i));
+                    Logging.Debug(_getOpcodeDebugLabel(instruction, z, i));
                     yield return instruction;
                 }
             }
@@ -84,7 +86,7 @@ internal static class DefaultGameSpawningPatch
                 }
                 skip:
                 
-                if(debug) Log.Debug(_getOpcodeDebugLabel(instruction, z));
+                Logging.Debug(_getOpcodeDebugLabel(instruction, z));
                 yield return instruction;
             }
         }

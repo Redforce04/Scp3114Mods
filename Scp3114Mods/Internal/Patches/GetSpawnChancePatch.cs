@@ -17,6 +17,7 @@ using PlayerRoles;
 using PlayerRoles.PlayableScps;
 using PlayerRoles.RoleAssign;
 using PluginAPI.Core;
+using Scp3114Mods.API;
 using static HarmonyLib.AccessTools;
 
 namespace Scp3114Mods.Internal.Patches;
@@ -28,7 +29,7 @@ internal static class GetSpawnChancePatch
     [HarmonyTranspiler]
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
-        if (Config.Dbg) Log.Debug($"Patching Transpiler GetSpawnChancePatch");
+        Logging.Debug($"Patching Transpiler GetSpawnChancePatch");
 
         /*
             - Change label Operand @ 003a (0070[] -> 006B[])
@@ -61,7 +62,7 @@ internal static class GetSpawnChancePatch
                 {
                     CodeInstruction instruction = injectedInstructions[i];
                     
-                    if (debug) Log.Debug(_getOpcodeDebugLabel(instruction, z, i));
+                    Logging.Debug(_getOpcodeDebugLabel(instruction, z, i));
                     yield return instruction;
                 }
 
@@ -73,7 +74,7 @@ internal static class GetSpawnChancePatch
             {
                 var instruction = newInstructions[z];
         
-                if(debug) Log.Debug(_getOpcodeDebugLabel(instruction, z));
+                Logging.Debug(_getOpcodeDebugLabel(instruction, z));
                 yield return instruction;
             }
         }
@@ -111,7 +112,7 @@ internal static class GetSpawnChancePatch
         foreach (var x in enqueuedRoles)
             enqueued += $" [{x}]";
         
-        if(Config.Dbg) Log.Debug($"[{role}] {chance}%     {enqueued}");
+        Logging.Debug($"[{role}] {chance}%     {enqueued}");
         return chance;
     }
 }

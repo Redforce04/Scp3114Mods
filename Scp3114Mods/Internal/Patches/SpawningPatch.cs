@@ -14,6 +14,7 @@ using HarmonyLib;
 using PlayerRoles;
 using PlayerRoles.PlayableScps.Scp3114;
 using PluginAPI.Core;
+using Scp3114Mods.API;
 using UnityEngine;
 using Random = System.Random;
 
@@ -43,7 +44,7 @@ internal static class SpawningPatch
                       $"[Percent: {Scp3114Mods.Singleton.Config.PercentOfPlayers}], \n";
         if (UnityEngine.Random.value > Scp3114Mods.Singleton.Config.SpawnChance * .01)
         {
-            if (Config.Dbg) Log.Debug(text + "Denied Spawn due to spawn chance.");
+            Logging.Debug(text + "Denied Spawn due to spawn chance.");
             return false;
         }
         
@@ -53,7 +54,7 @@ internal static class SpawningPatch
         amount = Mathf.Clamp(amount, Scp3114Mods.Singleton.Config.MinimumScp3114Count, Scp3114Mods.Singleton.Config.MaximumScp3114Count);
         text += $"$[Clamped Count: {amount}],\n";
         text += $"$[Initial Human Count: {Scp3114Spawner.SpawnCandidates.Count}],\n";
-        if(Config.Dbg) Log.Debug(text);
+        Logging.Debug(text);
         Scp3114Spawner.SpawnCandidates.Clear();
         PlayerRolesUtils.ForEachRole<HumanRole>(Scp3114Spawner.SpawnCandidates.Add);
         List<ReferenceHub> chosenPlayers = new List<ReferenceHub>();
