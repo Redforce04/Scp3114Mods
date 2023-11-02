@@ -19,6 +19,6 @@ public class Scp3114Spawn : Scp3114Role, ISpawnableScp
 {
     public float GetSpawnChance(List<RoleTypeId> alreadySpawned)
     {
-        return 1f;
+        return Scp3114Mods.Singleton.Config.SpawnChance;
     }
 }

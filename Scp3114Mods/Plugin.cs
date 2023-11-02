@@ -72,7 +72,8 @@ public class Scp3114Mods : Plugin<Config, Translations>
 
         // UnRegister NWSpawnScp3114
         RoleAssigner.OnPlayersSpawned -= Scp3114Spawner.OnPlayersSpawned;
-        
+        ScpSpawner.EnqueuedScps.Add(RoleTypeId.Scp3114);
+
         API.Events.StranglingPlayer += Handlers.OnStranglingPlayer;
         EventManager.RegisterEvents(Handlers);
         Harmony.PatchAll();
