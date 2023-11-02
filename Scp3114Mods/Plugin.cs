@@ -35,22 +35,23 @@ public class Scp3114Mods : Plugin<Config, Translations>
     public EventHandlers Handlers { get; set; } = null!;
     
 #if !EXILED
-    [PluginConfig] 
+    [PluginConfig("Translations")] 
     public Translations Translation;
 
-    [PluginConfig]
-    public Config Config = null!;
+    [PluginConfig] public Config Config;
 #endif
     public bool EventsRegistered { get; set; } = false;
     internal void _clearCooldownList() => _scp3114Strangles.Clear();
     
 #if !EXILED
-    [PluginEntryPoint("Scp3114Mods", VersionName, "Modifies the mechanics of Scp3114 to be more balanced.", "Redforce04")]
+    [PluginEntryPoint("Scp3114Mods", VersionName, "Modifies the mechanics of Scp3114 to be more balanced.",
+        "Redforce04")]
 #endif
     public void OnStart()
     {
         Singleton = this;
-        Log.Info("Scp3114Mods has been initialized." + ( Config.Dbg ? " [Debug]" : ""));
+
+        Log.Info("Scp3114Mods has been initialized." + (Config.Dbg ? " [Debug]" : ""));
         Handlers = new EventHandlers();
         Harmony = new Harmony("me.redforce04.scp3114mods");
         if (!Config.IsEnabled)

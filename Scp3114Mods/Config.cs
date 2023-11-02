@@ -11,6 +11,7 @@
 // -----------------------------------------
 
 using System.ComponentModel;
+using PlayerRoles;
 using YamlDotNet.Serialization;
 
 namespace Scp3114Mods;
@@ -22,7 +23,11 @@ public class Config : Exiled.API.Interfaces.IConfig
 #endif
 {
     [YamlIgnore]
-    public static bool Dbg => Scp3114Mods.Singleton.Config.Debug;
+    public static bool Dbg
+    {
+        get => Scp3114Mods.Singleton?.Config?.Debug ?? false;
+        
+    }
     
     [Description("Determines whether the plugin is enabled or not.")]
     public bool IsEnabled { get; set; } = true;
@@ -108,7 +113,7 @@ public class Config : Exiled.API.Interfaces.IConfig
     public bool SpawnFromHumanRoles { get; set; } = true;
 
     [Description("Percent of Scp3114 spawning in general. Only applies if SpawnFromHumanRoles is enabled. Set to 100 to guarantee at least one scp3114 spawn. if 50/50, half of games won't spawn scp3114.")]
-    public int SpawnChance { get; set; } = 10;
+    public int SpawnChance { get; set; } = 50;
     
     [Description("Percent of players to spawn as Scp3114. Ex: 10% of alive human players will become 3114 (if SpawnFromHumanRoles is enabled) or there is a 10% chance of and scp starting as 3114")]
     public int PercentOfPlayers { get; set; } = 10;
@@ -119,4 +124,24 @@ public class Config : Exiled.API.Interfaces.IConfig
     [Description("How many players can be spawned as scp3114.")]
     public int MaximumScp3114Count { get; set; } = 1;
 
+    [Description("Allows you to prevent spectators from watch 3114's role. Available Options: \n" +
+                 "# Disabled - Allows spectators to spectate 3114 normally.\n" +
+                 "# PersistentRoleSpoof - 3114 will have a different role visible to spectators, even when out of disguise.\n" +
+                 "# TemporaryRoleSpoof - 3114 will have a different role only while in disguise.")]
+    public SpectatorHideMode SpectatorHideMode { get; set; } = SpectatorHideMode.Disabled;
+
+    [Description("What role spectators will see when viewing 3114. By default (None) the role will be chosen based off of the last role 3114 had. ")]
+    public RoleTypeId SpectatorRole3114 { get; set; } = RoleTypeId.None;
+
+}
+
+public enum SpectatorHideMode
+{
+    [Description("# Disabled - Allows spectators to spectate 3114 normally.")]
+    Disabled = 0,
+    [Description("# PersistentRoleSpoof - 3114 will have a different role visible to spectators, even when out of disguise.")]
+    PersistentRoleSpoof = 1,
+    [Description("# TemporaryRoleSpoof - 3114 will have a different role only while in disguise.")]
+    TemporaryRoleSpoof = 1,
+    
 }

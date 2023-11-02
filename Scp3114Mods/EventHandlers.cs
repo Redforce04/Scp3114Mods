@@ -20,6 +20,7 @@ using MEC;
 using PlayerRoles;
 using PlayerRoles.PlayableScps.Scp049;
 using PlayerRoles.PlayableScps.Scp3114;
+using PlayerRoles.PlayableScps.Subroutines;
 using PluginAPI.Core;
 using PluginAPI.Core.Attributes;
 using PluginAPI.Enums;
@@ -33,6 +34,7 @@ namespace Scp3114Mods;
 public class EventHandlers
 {
 
+    // Shows a message to players informing them about the various features they can use as scp3114
     [PluginEvent(ServerEventType.PlayerChangeItem)]
     internal void ShowMessage(PlayerChangeItemEvent ev)
     {
@@ -45,13 +47,13 @@ public class EventHandlers
                     return;
                 if (Scp3114Mods.Singleton.Config.FakeFiringAllowed && item is Firearm)
                 {
-                    ev.Player.ReceiveHint("You can fake shoot weapons by pressing [T].", 4f);
+                    _sendMessage(ev.Player, "You can fake shoot weapons by pressing [T].", 4f);
                     return;
                 }
 
                 if (Scp3114Mods.Singleton.Config.FakeUsableInteractions && item is UsableItem)
                 {
-                    ev.Player.ReceiveHint("You can fake use items by right clicking with your mouse", 4f);
+                    _sendMessage(ev.Player,"You can fake use items by right clicking with your mouse", 4f);
                     return;
                 }
             }
@@ -68,12 +70,28 @@ public class EventHandlers
         Scp3114Mods.Singleton._clearCooldownList();
     }
     
-
+    // Processes Role Changes.
     [PluginEvent(ServerEventType.PlayerChangeRole)]
     internal void OnRoleChange(PlayerChangeRoleEvent ev)
     {
+        if (Scp3114Mods.Singleton.Config.SpectatorHideMode == SpectatorHideMode.Disabled)
+            goto skipSpectatorCheck;
+
+        // Spoof player role for spectators if config is enabled.
+        if (ev.NewRole == RoleTypeId.Spectator)
+        {
+            _hide3114ForSpectator(ev.Player);
+        }   
+
+        // Un-Spoof player role for spectators if config is enabled.
+        if (ev.OldRole.RoleTypeId == RoleTypeId.Spectator)
+        {
+            _show3114ForPlayer(ev.Player);
+        }
+        skipSpectatorCheck:
         if (ev.NewRole != RoleTypeId.Scp3114)
             return;
+        // Check strangle cooldown.
         try
         {
             if (Config.Dbg) Log.Debug("Scp 3114 processing actions");
@@ -85,7 +103,6 @@ public class EventHandlers
                           !role.SubroutineModule.TryGetSubroutine<Scp3114Strangle>(out var strangle) ||
                           strangle is null))
                         strangle._postReleaseCooldown = Scp3114Mods.Singleton.Config.StranglePartialCooldown;
-
                 });
             }
             if (Scp3114Mods.Singleton.Config.DisguiseDuration != 0)
@@ -102,7 +119,64 @@ public class EventHandlers
         }
     }
 
+    /// <summary>
+    /// Re-syncs 3114 role info for a player.
+    /// </summary>
+    private void _show3114ForPlayer(Player updateFor)
+    {
+        try
+        {
+            foreach (Player ply in Player.GetPlayers())
+            {
+                if (ply.Role != RoleTypeId.Scp3114)
+                    continue;
+                
+                ply.ChangeAppearance(RoleTypeId.Scp3114, new List<Player> {updateFor});
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Could not refresh spoofed info to player {updateFor.Nickname}.");
+            if (Config.Dbg) Log.Debug($"Exception: \n{e}");
+        }
+    }
+    
+    /// <summary>
+    /// Hides scp 3114 to players (if the config setting is enabled.)
+    /// </summary>
+    private void _hide3114ForSpectator(Player spectator)
+    {
+        try
+        {
+            foreach (Player ply in Player.GetPlayers())
+            {
+                if (ply.Role != RoleTypeId.Scp3114)
+                    continue;
+                if (ply.RoleBase is not Scp3114Role scpRole)
+                    continue;
+                if (Scp3114Mods.Singleton.Config.SpectatorHideMode == SpectatorHideMode.TemporaryRoleSpoof && !scpRole.Disguised)
+                    continue;
+                RoleTypeId lastRole = Scp3114Mods.Singleton.Config.SpectatorRole3114 == RoleTypeId.None ? (scpRole.Disguised ? scpRole.RoleTypeId : RoleTypeId.None) : Scp3114Mods.Singleton.Config.SpectatorRole3114;
+                if (lastRole != RoleTypeId.None)
+                {
+                    ply.ChangeAppearance(lastRole, new List<Player> {spectator});
+                    continue;
+                }
 
+                ply.ChangeAppearance(RoleTypeId.ClassD,new List<Player> {spectator});
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Could not send fake spectator info to player {spectator.Nickname}.");
+            if (Config.Dbg) Log.Debug($"Exception: \n{e}");
+        }
+    }
+
+
+    /// <summary>
+    /// Processes Strangle Information.
+    /// </summary>
     public void OnStranglingPlayer(StranglingPlayerArgs ev)
     {
         if (Scp3114Mods.Singleton.Config.CanTutorialsBeStrangled && ev.Target.Role == RoleTypeId.Tutorial)
@@ -141,6 +215,9 @@ public class EventHandlers
         ev.IsAllowed = false;
     }
 
+    /// <summary>
+    /// Used to send a message player in respect to the config setting for Broadcasts vs Hints.
+    /// </summary>
     private static void _sendMessage(Player ply, string message, float duration)
     {
         if (Scp3114Mods.Singleton.Config.UseHintsInsteadOfBroadcasts)
@@ -176,7 +253,9 @@ public class EventHandlers
         return true;
     }
     
-    
+    /// <summary>
+    /// Processes the fake firing args for dry-firing.
+    /// </summary>
     private void _processDryFiring(Firearm firearm, Player sender)
     {
         if (Config.Dbg) Log.Debug("Fake dry firing gun.");
@@ -198,6 +277,9 @@ public class EventHandlers
                 break;
         }
     }
+    /// <summary>
+    /// Processes the fake firing args for normal firing.
+    /// </summary>
     private void _processFiring(Firearm firearm)
     {
         if (Config.Dbg) Log.Debug("Fake firing gun.");

@@ -31,14 +31,21 @@ public class TalkCommand : ICommand, IUsageProvider
     {
         bool isSelf = true;
         var ply = Player.Get(sender);
-        int danceNum = 0;
+        int voiceNum = 0;
+        Scp3114VoiceLines.VoiceLinesName voiceLine = Scp3114VoiceLines.VoiceLinesName.RandomIdle;
         if (arguments.Count > 1)
         {
-            if (arguments.Count > 1 && !int.TryParse(arguments.At(1), out danceNum))
+            if (!int.TryParse(arguments.At(1), out voiceNum))
             {
-                response = $"Could not parse voice line number from \"{arguments.At(1)}\".";
-                return false;
+                if (!Enum.TryParse<Scp3114VoiceLines.VoiceLinesName>(arguments.At(1), true, out voiceLine))
+                {
+                    response = $"Could not parse voice line from \"{arguments.At(1)}\".";
+                    return false;
+                }
             }
+            else
+                voiceLine = (Scp3114VoiceLines.VoiceLinesName)voiceNum;
+            
             if (!sender.CheckPermission(PlayerPermissions.GivingItems))
             {
                 response = "You don't have permission to do this. (GivingItems).";
@@ -62,10 +69,18 @@ public class TalkCommand : ICommand, IUsageProvider
         }
         else
         {
-            if (arguments.Count > 0 && !int.TryParse(arguments.At(0), out danceNum))
+            if (arguments.Count > 0)
             {
-                response = $"Could not parse voice line number from \"{arguments.At(0)}\".";
-                return false;
+                if (!int.TryParse(arguments.At(0), out voiceNum))
+                {
+                    if (!Enum.TryParse<Scp3114VoiceLines.VoiceLinesName>(arguments.At(0), true, out voiceLine))
+                    {
+                        response = $"Could not parse voice line from \"{arguments.At(0)}\".";
+                        return false;
+                    }
+                }
+                else
+                    voiceLine = (Scp3114VoiceLines.VoiceLinesName)voiceNum;
             }
         }
         if (ply is null || ply.Role != RoleTypeId.Scp3114)
@@ -89,8 +104,13 @@ public class TalkCommand : ICommand, IUsageProvider
                 response = $"Could not make {(isSelf ? "you" : $"player {ply.Nickname}")} talk due to an error.";
                 return false;
             }
-            // voice.
             
+            if (voice._voiceLines.Length < voiceNum)
+            {
+                response = "Could not find that voiceline.";
+                return false;
+            }
+            voice.ServerPlayConditionally(voiceLine);
             response = $"{(isSelf ? "You" : $"Player {ply.Nickname}")} is now talking.";
         }
         catch (Exception e)

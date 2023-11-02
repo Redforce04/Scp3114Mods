@@ -21,6 +21,7 @@ using static HarmonyLib.AccessTools;
 
 namespace Scp3114Mods.Internal.Patches;
 
+
 [HarmonyPatch(typeof(ScpSpawner),nameof(ScpSpawner.NextScp), MethodType.Getter)]
 internal static class GetSpawnChancePatch
 {
@@ -102,6 +103,8 @@ internal static class GetSpawnChancePatch
             return spawnableScp.GetSpawnChance(enqueuedRoles);
         }
 
+        if (Scp3114Mods.Singleton.Config.SpawnFromHumanRoles)
+            return 0;
         return Scp3114Mods.Singleton.Config.SpawnChance;
     }
 }

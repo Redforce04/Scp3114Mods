@@ -1,5 +1,4 @@
-﻿// <copyright file="Log.cs" company="Redforce04#4091">
-// Copyright (c) Redforce04. All rights reserved.
+﻿// Copyright (c) Redforce04. All rights reserved.
 // </copyright>
 // -----------------------------------------
 //    Solution:         Scp3114Mods
@@ -13,7 +12,7 @@
 
 using CommandSystem;
 
-namespace Scp3114Mods;
+namespace Scp3114Mods.Internal.Commands;
 
 [CommandHandler(typeof(RemoteAdminCommandHandler))]
 [CommandHandler(typeof(GameConsoleCommandHandler))]

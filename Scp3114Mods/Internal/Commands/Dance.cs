@@ -32,7 +32,7 @@ public class Dance : ICommand, IUsageProvider
         bool isSelf = true;
         var ply = Player.Get(sender);
         int danceNum = 0;
-        if (sender is PlayerCommandSender && arguments.Count > 0)
+        if (arguments.Count > 1)
         {
             if (arguments.Count > 1 && !int.TryParse(arguments.At(1), out danceNum))
             {
