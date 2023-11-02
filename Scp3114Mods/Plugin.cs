@@ -25,6 +25,8 @@ public class Scp3114Mods : Plugin<Config, Translations>
     public override string Name => "Scp3114Mods";
     public override string Prefix => "3114";
     public override Version Version => Version.Parse(VersionName);
+    // Like the whole codebase is built on NWApi because I refuse to maintain two separate versions, when its not necessary (the cedmod philosophy).
+    public override Version RequiredExiledVersion  => new Version(8, 3, 0); 
     public override PluginPriority Priority => PluginPriority.Default;
 #endif
     public const string VersionName = "1.0.3";
@@ -41,12 +43,13 @@ public class Scp3114Mods : Plugin<Config, Translations>
     [PluginConfig] public Config Config;
 #endif
     public bool EventsRegistered { get; set; } = false;
+    public override void OnEnabled()
     
 #if !EXILED
     [PluginEntryPoint("Scp3114Mods", VersionName, "Modifies the mechanics of Scp3114 to be more balanced.",
         "Redforce04")]
+    public void OnEnabled()
 #endif
-    public void OnStart()
     {
         Singleton = this;
 
@@ -56,6 +59,7 @@ public class Scp3114Mods : Plugin<Config, Translations>
         if (!Config.IsEnabled)
             return;
         RegisterEvents();
+        base.OnEnabled();
     }
 
     internal void RegisterEvents()
@@ -67,15 +71,18 @@ public class Scp3114Mods : Plugin<Config, Translations>
         Harmony.PatchAll();
     }
 
-#if !EXILED
+#if EXILED
+    public override void OnDisabled()
+#else
     [PluginUnload]
+    public void OnDisabled()
 #endif
-    public void OnStop()
     {
         UnregisterEvents();
         Harmony = null;
         Handlers = null;
         Singleton = null;
+        base.OnDisabled();
     }
 
     internal void UnregisterEvents()

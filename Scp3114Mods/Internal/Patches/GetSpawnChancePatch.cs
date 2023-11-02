@@ -27,8 +27,9 @@ internal static class GetSpawnChancePatch
 {
     [HarmonyTranspiler]
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
-    {        
-        
+    {
+        if (Config.Dbg) Log.Debug($"Patching Transpiler GetSpawnChancePatch");
+
         /*
             - Change label Operand @ 003a (0070[] -> 006B[])
             - Leave
@@ -98,13 +99,19 @@ internal static class GetSpawnChancePatch
 
     private static float _getChance(PlayerRoleBase role, List<RoleTypeId> enqueuedRoles)
     {
+        float chance;
         if (role is ISpawnableScp spawnableScp)
         {
-            return spawnableScp.GetSpawnChance(enqueuedRoles);
+            chance = spawnableScp.GetSpawnChance(enqueuedRoles);
         }
+        else
+            chance = Scp3114Mods.Singleton.Config.SpawnFromHumanRoles ? 0 :  Scp3114Mods.Singleton.Config.SpawnChance;
 
-        if (Scp3114Mods.Singleton.Config.SpawnFromHumanRoles)
-            return 0;
-        return Scp3114Mods.Singleton.Config.SpawnChance;
+        string enqueued = "";
+        foreach (var x in enqueuedRoles)
+            enqueued += $" [{x}]";
+        
+        if(Config.Dbg) Log.Debug($"[{role}] {chance}%     {enqueued}");
+        return chance;
     }
 }

@@ -26,7 +26,7 @@ public class Config : Exiled.API.Interfaces.IConfig
     public static bool Dbg
     {
         get => Scp3114Mods.Singleton?.Config?.Debug ?? false;
-        
+        set { } // Exiled aint got no yamlignore or equiv for the copy properties method :clueless:
     }
     
     [Description("Determines whether the plugin is enabled or not.")]

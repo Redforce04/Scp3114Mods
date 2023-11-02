@@ -26,7 +26,7 @@ internal static class DefaultGameSpawningPatch
     [HarmonyTranspiler]
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
-    
+        if (Config.Dbg) Log.Debug($"Patching Transpiler Default GameSpawningPatch");
             /*
             og //IL_0028: ldloca.s  keyValuePair
             og //IL_002A: call      instance !1 valuetype [mscorlib]System.Collections.Generic.KeyValuePair`2<valuetype PlayerRoles.RoleTypeId, class PlayerRoles.PlayerRoleBase>::get_Value()
