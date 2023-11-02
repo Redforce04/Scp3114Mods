@@ -52,7 +52,7 @@ public class Config : Exiled.API.Interfaces.IConfig
     public float StranglePartialCooldown { get; set; } = 10f;
     
     [Description("Can Scp3114 strangle innocents / Class D or Scientists without a weapon.")]
-    public bool AllowStranglingInnocents { get; set; } = true;
+    public bool AllowStranglingInnocents { get; set; } = false;
     
     [Description("Items that will not prevent strangline.")]
     public List<ItemType> StrangleNonInnocentItems = new List<ItemType>()
@@ -76,9 +76,9 @@ public class Config : Exiled.API.Interfaces.IConfig
         ItemType.SCP330
     };
     [Description("Does the target of the strangle have to have an empty hand.")]
-    public bool RequireEmptyHandToStrangleAll { get; set; } = true;
+    public bool RequireEmptyHandToStrangleAll { get; set; } = false;
     [Description("Does the target of the strangle have to have an empty hand if non innocent.")]
-    public bool RequireEmptyHandToStrangleInnocents { get; set; } = true;
+    public bool RequireEmptyHandToStrangleInnocents { get; set; } = false;
 
     [Description("A list of items that will be considered \"empty hands\" for the empty hand strangle config.")]
     public List<ItemType> ItemsThatWontBlockStrangle { get; set; } = new List<ItemType>()
@@ -87,7 +87,7 @@ public class Config : Exiled.API.Interfaces.IConfig
     };
 
     [Description("Can tutorials be strangled.")]
-    public bool CanTutorialsBeStrangled { get; set; } = false;
+    public bool DisableTutorialsStrangling { get; set; } = true;
 
     [Description("Does candy cause a player to lose innocence.")]
     public bool CandyLosesInnocence { get; set; } = true;
@@ -103,11 +103,11 @@ public class Config : Exiled.API.Interfaces.IConfig
     [Description("How long shoud disguises last before being destroyed. -1 is infinite, and 0 is game default.")]
     public float DisguiseDuration { get; set; } = 0;
 
-    [Description("How long the cooldown between new disguises lasts. 0 disabled.")]
-    public float DisguiseCooldown { get; set; } = -1;
-    
-    [Description("How long the cooldown after a failed disguis lasts. -1 is game default.")]
-    public float DisguiseFailedCooldown { get; set; } = -1;
+    // doesnt work
+    //[Description("How long the cooldown between new disguises lasts. 0 disabled.")]
+    // public float DisguiseCooldown { get; set; } = -1;
+    //[Description("How long the cooldown after a failed disguis lasts. -1 is game default.")]
+    //public float DisguiseFailedCooldown { get; set; } = -1;
 
     [Description("If set to true, players will be pulled from the human pool (default game). Otherwise, players are pulled from scps.")]
     public bool SpawnFromHumanRoles { get; set; } = true;

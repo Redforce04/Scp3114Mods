@@ -11,11 +11,13 @@
 // -----------------------------------------
 
 using HarmonyLib;
+using InventorySystem.Items;
 using InventorySystem.Items.Usables;
 using MEC;
 using Mirror;
 using PlayerRoles;
 using PluginAPI.Core;
+using Scp3114Mods.API;
 using Utils.Networking;
 
 namespace Scp3114Mods.Internal.Patches;
@@ -52,6 +54,18 @@ internal class UseItemPatch
                     {
                         ply.CurrentItem = null;
                         if (Config.Dbg) Log.Debug("Hiding Item for Fake Use.");
+                    });
+                }
+                else
+                {
+                    var item = ply.CurrentItem;
+                    //MirrorExtensions.SetDirtyBitsMethodInfo;
+                    ////this.GeneratedSyncVarSetter<ItemIdentifier>(value, ref this.CurItem, 1UL, new Action<ItemIdentifier, ItemIdentifier>(this.OnItemUpdated)
+                    //ply.SendFakeSyncVar(ply.ReferenceHub.networkIdentity, typeof(InventorySystem.Inventory), nameof(InventorySystem.Inventory.CurItem),new ItemIdentifier(ply.CurrentItem.ItemTypeId, ply.CurrentItem.ItemSerial));
+                    Timing.CallDelayed(usableItem.UseTime, () =>
+                    {
+                        ply.SendFakeSyncVar(ply.ReferenceHub.networkIdentity, typeof(InventorySystem.Inventory), nameof(InventorySystem.Inventory.CurItem),new ItemIdentifier(ply.CurrentItem.ItemTypeId, ply.CurrentItem.ItemSerial));
+                        // ply.CurrentItem = item;
                     });
                 }
             }

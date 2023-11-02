@@ -67,7 +67,6 @@ public class EventHandlers
     [PluginEvent(ServerEventType.RoundStart)]
     internal void OnRoundStart()
     {
-        Scp3114Mods.Singleton._clearCooldownList();
     }
     
     // Processes Role Changes.
@@ -179,7 +178,8 @@ public class EventHandlers
     /// </summary>
     public void OnStranglingPlayer(StranglingPlayerArgs ev)
     {
-        if (Scp3114Mods.Singleton.Config.CanTutorialsBeStrangled && ev.Target.Role == RoleTypeId.Tutorial)
+        if(Config.Dbg) Log.Debug($"Target Role: {ev.Target.Role}");
+        if (Scp3114Mods.Singleton.Config.DisableTutorialsStrangling && ev.Target.Role == RoleTypeId.Tutorial)
         {
             if (Config.Dbg) Log.Debug("Strangle Disabled. - Tutorial");
             _sendMessage(ev.Attacker, Scp3114Mods.Singleton.Translation.CannotStrangleTutorials, 5f);

@@ -39,17 +39,6 @@ internal static class StranglePatch
 	{
 		try
 		{
-
-			// If no features are in use, just skip the patch.
-			// Otherwise we outright replace the original method.
-			// This would be better as a set of transpilers but
-			// I don't want to invest the time into it right now.
-			if (  Scp3114Mods.Singleton.Config.AllowStranglingInnocents      && 
-			     !Scp3114Mods.Singleton.Config.CanTutorialsBeStrangled       &&
-			     !Scp3114Mods.Singleton.Config.RequireEmptyHandToStrangleAll &&
-			     !Scp3114Mods.Singleton.Config.RequireEmptyHandToStrangleInnocents)
-				return true;
-			
 			__result = null;
 
 			if (reader.Remaining == 0)

@@ -41,7 +41,6 @@ public class Scp3114Mods : Plugin<Config, Translations>
     [PluginConfig] public Config Config;
 #endif
     public bool EventsRegistered { get; set; } = false;
-    internal void _clearCooldownList() => _scp3114Strangles.Clear();
     
 #if !EXILED
     [PluginEntryPoint("Scp3114Mods", VersionName, "Modifies the mechanics of Scp3114 to be more balanced.",
@@ -76,7 +75,6 @@ public class Scp3114Mods : Plugin<Config, Translations>
         UnregisterEvents();
         Harmony = null;
         Handlers = null;
-        //_scp3114Cooldowns = null;
         Singleton = null;
     }
 
@@ -87,12 +85,5 @@ public class Scp3114Mods : Plugin<Config, Translations>
         EventManager.UnregisterEvents(Handlers);
         EventsRegistered = false;
     }
-    private List<Scp3114Strangle> _scp3114Strangles { get; set; } = new List<Scp3114Strangle >();
-
-    internal void AddCooldownForPlayer(Scp3114Strangle strangle)
-    {
-        if (_scp3114Strangles.Contains(strangle))
-            return;
-        _scp3114Strangles.Add(strangle);
-    }
+    
 }

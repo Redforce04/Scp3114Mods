@@ -30,7 +30,8 @@ internal static class DisguiseProgressSetPatch
     /// </summary>
     private static bool Prefix(Scp3114Disguise __instance)
     {
-        //__instance.OnProgressSet();
+        return true;
+        /*
         Scp3114Identity.StolenIdentity curIdentity = __instance.ScpRole.CurIdentity;
         if (__instance.IsInProgress)
         {
@@ -43,10 +44,11 @@ internal static class DisguiseProgressSetPatch
         {
             __instance._equipSkinSound.Stop();
             curIdentity.Status = Scp3114Identity.DisguiseStatus.None;
-            __instance.Cooldown.Trigger(Scp3114Mods.Singleton.Config.DisguiseFailedCooldown == -1 ? __instance.Duration : Scp3114Mods.Singleton.Config.DisguiseFailedCooldown);
+            if (Scp3114Mods.Singleton.Config.DisguiseFailedCooldown != 0)
+                __instance.Cooldown.Trigger(Scp3114Mods.Singleton.Config.DisguiseFailedCooldown == -1 ? __instance.Duration : Scp3114Mods.Singleton.Config.DisguiseFailedCooldown);
             if (Config.Dbg) Log.Debug("Disguise Cooldown Triggered");
         }
-
         return false;
+        */
     }
 }

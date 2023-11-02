@@ -29,7 +29,7 @@ internal static class DisguiseRemovedPatch
     /// </summary>
     private static void Postfix(Scp3114Identity __instance)
     {
-        
+        return;/*
         float cooldown = Scp3114Mods.Singleton.Config.DisguiseCooldown;
         if (Config.Dbg) Log.Debug($"Processing Disguise Cooldown {cooldown}");
         if (cooldown <= 0)
@@ -38,7 +38,8 @@ internal static class DisguiseRemovedPatch
             return;
         if (!role.SubroutineModule.TryGetSubroutine<Scp3114Disguise>(out var disguise) || disguise is null)
             return;
+        
         disguise.Cooldown.Trigger(cooldown);
-        if (Config.Dbg) Log.Debug($"Disguise Cooldown Triggered {cooldown}");
+        if (Config.Dbg) Log.Debug($"Disguise Cooldown Triggered {cooldown}");*/
     }
 }
