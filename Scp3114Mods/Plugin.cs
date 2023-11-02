@@ -60,7 +60,9 @@ public class Scp3114Mods : Plugin<Config, Translations>
         if (!Config.IsEnabled)
             return;
         RegisterEvents();
+#if EXILED
         base.OnEnabled();
+#endif
     }
 
     internal void RegisterEvents()
@@ -83,7 +85,9 @@ public class Scp3114Mods : Plugin<Config, Translations>
         Harmony = null;
         Handlers = null;
         Singleton = null;
+#if EXILED
         base.OnDisabled();
+#endif
     }
 
     internal void UnregisterEvents()
