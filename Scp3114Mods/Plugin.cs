@@ -45,9 +45,10 @@ public class Scp3114Mods : Plugin<Config, Translations>
     [PluginConfig] public Config Config;
 #endif
     public bool EventsRegistered { get; set; } = false;
+#if EXILED
     public override void OnEnabled()
     
-#if !EXILED
+#else
     [PluginEntryPoint("Scp3114Mods", VersionName, "Modifies the mechanics of Scp3114 to be more balanced.",
         "Redforce04")]
     public void OnEnabled()
