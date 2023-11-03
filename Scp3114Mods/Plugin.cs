@@ -11,6 +11,8 @@ using Debug = System.Diagnostics.Debug;
 using Log = PluginAPI.Core.Log;
 using PluginPriority = Exiled.API.Enums.PluginPriority;
 using PlayerRoles.RoleAssign;
+using Scp3114Mods.Internal;
+using Scp3114Mods.Internal.Patches;
 #if EXILED
 using Exiled.API.Features;
 using Exiled.API.Interfaces;
@@ -31,7 +33,7 @@ public class Scp3114Mods : Plugin<Config, Translations>
     public override Version RequiredExiledVersion  => new Version(8, 3, 0); 
     public override PluginPriority Priority => PluginPriority.Default;
 #endif
-    public const string VersionName = "1.0.3";
+    public const string VersionName = "1.0.4";
     public static Scp3114Mods Singleton = null!;
 
     public Harmony Harmony { get; set; } = null!;
@@ -61,6 +63,7 @@ public class Scp3114Mods : Plugin<Config, Translations>
         Harmony = new Harmony("me.redforce04.scp3114mods");
         if (!Config.IsEnabled)
             return;
+        var unused = new PlayerPreferenceManager();
         RegisterEvents();
 #if EXILED
         base.OnEnabled();
@@ -73,8 +76,7 @@ public class Scp3114Mods : Plugin<Config, Translations>
 
         // UnRegister NWSpawnScp3114
         RoleAssigner.OnPlayersSpawned -= Scp3114Spawner.OnPlayersSpawned;
-        ScpSpawner.EnqueuedScps.Add(RoleTypeId.Scp3114);
-
+        
         API.Events.StranglingPlayer += Handlers.OnStranglingPlayer;
         EventManager.RegisterEvents(Handlers);
         Harmony.PatchAll();
@@ -88,6 +90,7 @@ public class Scp3114Mods : Plugin<Config, Translations>
 #endif
     {
         UnregisterEvents();
+        PlayerPreferenceManager.Singleton.Deconstruct();
         Harmony = null;
         Handlers = null;
         Singleton = null;
@@ -103,4 +106,7 @@ public class Scp3114Mods : Plugin<Config, Translations>
         EventManager.UnregisterEvents(Handlers);
         EventsRegistered = false;
     }
+    
+    
+    
 }

@@ -35,9 +35,11 @@ public class Events
 
     #region Events
     public static event Action<StranglingPlayerArgs> StranglingPlayer;
+    public static event Action<StrangleFinishedEventArgs> StrangleFinished;
     #endregion
     
     #region EventInvocations
     public static void OnPlayerStrangling(StranglingPlayerArgs ev) => StranglingPlayer.Invoke(ev);
+    public static void OnStrangleFinished(StrangleFinishedEventArgs ev) => StrangleFinished.Invoke(ev);
     #endregion
 }

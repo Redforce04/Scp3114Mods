@@ -34,6 +34,9 @@ public class Config : Exiled.API.Interfaces.IConfig
 
     [Description("Should debug logs be shown.")]
     public bool Debug { get; set; } = false;
+    
+    [Description("Where the player preference file should be located.")]
+    public string PlayerPreferenceFileLocation { get; set; } = "";
 
     [Description("If true, players will be notified of gameplay mechanics with hints. If false, broadcasts will be used.")]
     public bool UseHintsInsteadOfBroadcasts { get; set; } = true;

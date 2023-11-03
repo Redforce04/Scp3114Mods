@@ -178,8 +178,9 @@ public class EventHandlers
     /// </summary>
     public void OnStranglingPlayer(StranglingPlayerArgs ev)
     {
-        Logging.Debug($"Target Role: {ev.Target.Role}");
-        if (Scp3114Mods.Singleton.Config.DisableTutorialsStrangling && ev.Target.Role == RoleTypeId.Tutorial)
+        Player target = Player.Get(ev.Target.Target);
+        Logging.Debug($"Target Role: {target.Role}");
+        if (Scp3114Mods.Singleton.Config.DisableTutorialsStrangling && target.Role == RoleTypeId.Tutorial)
         {
             Logging.Debug("Strangle Disabled. - Tutorial");
             _sendMessage(ev.Attacker, Scp3114Mods.Singleton.Translation.CannotStrangleTutorials, 5f);
@@ -188,7 +189,7 @@ public class EventHandlers
         }
         
         // is player innocent?
-        if (!Scp3114Mods.Singleton.Config.AllowStranglingInnocents && ev.Target.IsPlayerInnocent())
+        if (!Scp3114Mods.Singleton.Config.AllowStranglingInnocents && target.IsPlayerInnocent())
         {
             Logging.Debug("Strangle Disabled. - Innocent");
 
@@ -198,12 +199,12 @@ public class EventHandlers
         }
         
         // Is the player is not holding an item or the item doesnt count as a strangle blocking item, skip. 
-        if (ev.Target.CurrentItem is null || Scp3114Mods.Singleton.Config.ItemsThatWontBlockStrangle.Contains(ev.Target.CurrentItem.ItemTypeId))
+        if (target.CurrentItem is null || Scp3114Mods.Singleton.Config.ItemsThatWontBlockStrangle.Contains(target.CurrentItem.ItemTypeId))
             return;
         
         bool emptyHandAll = Scp3114Mods.Singleton.Config.RequireEmptyHandToStrangleAll;
         bool emptyHandInnocent = Scp3114Mods.Singleton.Config.RequireEmptyHandToStrangleInnocents &&
-                                 ev.Target.IsPlayerInnocent();
+                                 target.IsPlayerInnocent();
         if (!emptyHandAll && !emptyHandInnocent)
             return;
         

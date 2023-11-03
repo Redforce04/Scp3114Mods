@@ -29,7 +29,6 @@ internal static class GetSpawnChancePatch
     [HarmonyTranspiler]
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
-        Logging.Debug($"Patching Transpiler GetSpawnChancePatch");
 
         /*
             - Change label Operand @ 003a (0070[] -> 006B[])
@@ -54,6 +53,7 @@ internal static class GetSpawnChancePatch
         };
         
         const bool debug = false;
+        if(debug) Logging.Debug($"Patching Transpiler GetSpawnChancePatch");
         for (int z = 0; z < newInstructions.Count; z++)
         {
             if (z == index) // inject code at insert location
@@ -62,7 +62,7 @@ internal static class GetSpawnChancePatch
                 {
                     CodeInstruction instruction = injectedInstructions[i];
                     
-                    Logging.Debug(_getOpcodeDebugLabel(instruction, z, i));
+                    if(debug) Logging.Debug(_getOpcodeDebugLabel(instruction, z, i));
                     yield return instruction;
                 }
 
@@ -74,7 +74,7 @@ internal static class GetSpawnChancePatch
             {
                 var instruction = newInstructions[z];
         
-                Logging.Debug(_getOpcodeDebugLabel(instruction, z));
+                if(debug) Logging.Debug(_getOpcodeDebugLabel(instruction, z));
                 yield return instruction;
             }
         }
@@ -108,6 +108,9 @@ internal static class GetSpawnChancePatch
         else
             chance = Scp3114Mods.Singleton.Config.SpawnFromHumanRoles ? 0 :  Scp3114Mods.Singleton.Config.SpawnChance;
 
+        if (!Config.Dbg)
+            return chance;
+        
         string enqueued = "";
         foreach (var x in enqueuedRoles)
             enqueued += $" [{x}]";

@@ -28,7 +28,6 @@ internal static class DefaultGameSpawningPatch
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
      
-        Logging.Debug($"Patching Transpiler Default GameSpawningPatch");
             /*
             og //IL_0028: ldloca.s  keyValuePair
             og //IL_002A: call      instance !1 valuetype [mscorlib]System.Collections.Generic.KeyValuePair`2<valuetype PlayerRoles.RoleTypeId, class PlayerRoles.PlayerRoleBase>::get_Value()
@@ -58,6 +57,7 @@ internal static class DefaultGameSpawningPatch
             };
 
         const bool debug = false;
+        if(debug)Logging.Debug($"Patching Transpiler Default GameSpawningPatch");
         for (int z = 0; z < newInstructions.Count; z++)
         {
             if (z == index) // inject code at insert location
@@ -70,7 +70,7 @@ internal static class DefaultGameSpawningPatch
                         // Move the old label on the remove brfalse -> first skip.
                         instruction.operand = newInstructions[z].operand;
                     }
-                    Logging.Debug(_getOpcodeDebugLabel(instruction, z, i));
+                    if(debug) Logging.Debug(_getOpcodeDebugLabel(instruction, z, i));
                     yield return instruction;
                 }
             }
@@ -86,7 +86,7 @@ internal static class DefaultGameSpawningPatch
                 }
                 skip:
                 
-                Logging.Debug(_getOpcodeDebugLabel(instruction, z));
+                if(debug) Logging.Debug(_getOpcodeDebugLabel(instruction, z));
                 yield return instruction;
             }
         }

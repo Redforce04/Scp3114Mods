@@ -73,12 +73,12 @@ internal static class StranglePatch
 
 					Player targetPly = Player.Get(hub);
 					Player ply = Player.Get(__instance.Owner);
-					var ev = new StranglingPlayerArgs(ply, targetPly, true);
+					/*var ev = new StranglingPlayerArgs(ply, targetPly, true);
 					API.Events.SafeInvoke(() => { API.Events.OnPlayerStrangling(ev); });
 					if (!ev.IsAllowed)
 					{
 						return false;
-					}
+					}*/
 					
 					hub.playerEffectsController.EnableEffect<Strangled>();
 					value = new Scp3114Strangle.StrangleTarget(hub, __instance.GetStranglePosition(target), __instance.ScpRole.FpcModule.Position);

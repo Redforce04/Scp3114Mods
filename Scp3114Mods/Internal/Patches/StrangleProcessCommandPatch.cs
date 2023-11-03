@@ -9,11 +9,13 @@
 //    Created Date:     11/01/2023 8:54 PM
 // -----------------------------------------
 
+using HarmonyLib;
 using Mirror;
 using PlayerRoles.PlayableScps.Scp3114;
 
 namespace Scp3114Mods.Internal.Patches;
 
+[HarmonyPatch(typeof(Scp3114Strangle), nameof(Scp3114Strangle.ServerProcessCmd))]
 internal static class StrangleProcessCommandPatch
 {
     private static bool Prefix(Scp3114Strangle __instance, NetworkReader reader)
