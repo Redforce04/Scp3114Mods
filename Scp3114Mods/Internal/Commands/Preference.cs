@@ -12,6 +12,7 @@
 using System.Diagnostics.CodeAnalysis;
 using CommandSystem;
 using PluginAPI.Core;
+using UnityEngine;
 
 namespace Scp3114Mods.Internal.Commands;
 
@@ -21,7 +22,7 @@ internal class Preference : ICommand, IUsageProvider
     public string Command => "3114preference";
     public string[] Aliases => new[] { "3114pref" };
     public string Description => "Allows you to specify a preference for how often you get Scp3114.";
-    public string[] Usage => new[] { "Scp 3114 Preference (1-10)" };
+    public string[] Usage => new[] { "Scp 3114 Preference (0-10)" };
 
     public bool Execute(ArraySegment<string> arguments, ICommandSender sender, [UnscopedRef] out string response)
     {
@@ -58,6 +59,7 @@ internal class Preference : ICommand, IUsageProvider
             response = Scp3114Mods.Singleton.Translation.PlayerPreferenceCouldntDetermineNewPreference.Replace("{arg}", arguments.At(0));
             goto usage;
         }
+        preference = Mathf.Clamp(preference, 0, 10);
 
         PlayerPreferenceManager.Singleton.Set3114Preference(ply, preference);
         response = Scp3114Mods.Singleton.Translation.PlayerPreferenceSuccess.Replace("{newPref}", preference.ToString());

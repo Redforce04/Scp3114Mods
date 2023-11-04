@@ -15,6 +15,7 @@ using System.Security.Cryptography;
 using System.Text;
 using MEC;
 using Scp3114Mods.API;
+using UnityEngine;
 
 namespace Scp3114Mods.Internal;
 
@@ -165,7 +166,7 @@ internal class PlayerPreferenceManager
             get => _preference;
             set
             {
-                _preference = value;
+                _preference = Mathf.Clamp(value, 0, 10);
                 Singleton._updateLimitRecursion(this, 0);
             }
         }

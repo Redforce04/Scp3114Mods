@@ -13,6 +13,7 @@
 using HarmonyLib;
 using PlayerRoles.PlayableScps.Scp3114;
 using PlayerStatsSystem;
+using Scp3114Mods.API;
 
 namespace Scp3114Mods.Internal.Patches.Postfixes;
 
@@ -27,14 +28,24 @@ internal static class StrangleOnAnyPlayerDiedPostfix
     /// </summary>
     private static void Postfix(Scp3114Strangle __instance, ReferenceHub deadPly, DamageHandlerBase handler)
     {
-        if (Scp3114Mods.Singleton.Config.StrangleCooldown <= 0)
-            return;
-        if(handler is Scp3114DamageHandler damageHandler)
+        try
         {
-            if(damageHandler.Attacker.Hub == __instance.Owner && damageHandler.Subtype == Scp3114DamageHandler.HandlerType.Strangulation)
+
+            if (Scp3114Mods.Singleton.Config.StrangleCooldown <= 0)
+                return;
+            if (handler is Scp3114DamageHandler damageHandler)
             {
-                __instance.Cooldown.Trigger(Scp3114Mods.Singleton.Config.StrangleCooldown);
+                if (damageHandler.Attacker.Hub == __instance.Owner &&
+                    damageHandler.Subtype == Scp3114DamageHandler.HandlerType.Strangulation)
+                {
+                    __instance.Cooldown.Trigger(Scp3114Mods.Singleton.Config.StrangleCooldown);
+                }
             }
+        }
+        catch (Exception e)
+        {
+            Logging.Debug($"An error has been caught at StrangleOnAnyPlayerDiedPostfix. Exception: \n{e}");
+
         }
     }
 }

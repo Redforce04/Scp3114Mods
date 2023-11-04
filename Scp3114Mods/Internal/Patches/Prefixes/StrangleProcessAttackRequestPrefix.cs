@@ -90,7 +90,7 @@ internal static class StrangleProcessAttackRequestPrefix
 		}
 		catch (Exception e)
 		{
-			Logging.Error("Scp3114Mods has caught an error at Strangle Patch.");
+			Logging.Error("Scp3114Mods has caught an error at StrangleProcessAttackRequestPrefix.");
 			Logging.Debug($"Exception: \n{e}");
 
 			return true;

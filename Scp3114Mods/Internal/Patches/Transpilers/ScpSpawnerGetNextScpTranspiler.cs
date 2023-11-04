@@ -22,7 +22,7 @@ using static HarmonyLib.AccessTools;
 namespace Scp3114Mods.Internal.Patches.Transpilers;
 
 
-
+[HarmonyPatch(typeof(ScpSpawner), nameof(ScpSpawner.NextScp), MethodType.Getter)]
 internal static class ScpSpawnerGetNextScpTranspiler
 {
     [HarmonyTranspiler]
@@ -42,9 +42,7 @@ internal static class ScpSpawnerGetNextScpTranspiler
             - Remove 004d
          */
         List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent(instructions);
-        Dictionary<int, Label> labelIndexes = new Dictionary<int, Label>();
         int index = newInstructions.FindIndex(x => x.opcode == OpCodes.Isinst);
-        int changeLabel = index - 4;
         var injectedInstructions = new CodeInstruction[]
         {
             new (OpCodes.Ldsfld, Field(typeof(ScpSpawner), nameof(ScpSpawner.EnqueuedScps))),
@@ -99,22 +97,34 @@ internal static class ScpSpawnerGetNextScpTranspiler
 
     private static float _getChance(PlayerRoleBase role, List<RoleTypeId> enqueuedRoles)
     {
-        float chance;
-        if (role is ISpawnableScp spawnableScp)
+        try
         {
-            chance = spawnableScp.GetSpawnChance(enqueuedRoles);
-        }
-        else
-            chance = Scp3114Mods.Singleton.Config.SpawnFromHumanRoles ? 0 :  Scp3114Mods.Singleton.Config.SpawnChance;
 
-        if (!Config.Dbg)
+            float chance;
+            if (role is ISpawnableScp spawnableScp)
+            {
+                chance = spawnableScp.GetSpawnChance(enqueuedRoles);
+            }
+            else
+                chance = Scp3114Mods.Singleton.Config.SpawnFromHumanRoles
+                    ? 0
+                    : Scp3114Mods.Singleton.Config.SpawnChance * .01f;
+
+            if (!Config.Dbg)
+                return chance;
+
+            string enqueued = "";
+            foreach (var x in enqueuedRoles)
+                enqueued += $" [{x}]";
+
+            Logging.Debug($"[{role.RoleTypeId}] {chance:F2}%     {enqueued}");
             return chance;
-        
-        string enqueued = "";
-        foreach (var x in enqueuedRoles)
-            enqueued += $" [{x}]";
-        
-        Logging.Debug($"[{role}] {chance}%     {enqueued}");
-        return chance;
+        }
+        catch (Exception e)
+        {
+            Logging.Error($"A critical error has occured. Report this bug immediately");
+            Logging.Debug($"Exception: {e}");
+            return 1;
+        }
     }
 }

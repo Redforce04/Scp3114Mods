@@ -72,7 +72,7 @@ internal class UsableItemsServerReceivedStatusPostfix
         }
         catch (Exception e)
         {
-            Logging.Error("Scp3114Mods has caught an error at Fake Item Use Patch.");
+            Logging.Error("Scp3114Mods has caught an error at UsableItemsServerReceivedStatusPostfix.");
             Logging.Debug($"Exception: \n{e}");
             return;
         }

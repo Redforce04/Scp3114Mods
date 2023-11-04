@@ -40,7 +40,7 @@ public class Translations
                                                                      "\n\n- The ONLY DATA STORED includes:" +
                                                                      "\n- UserId" +
                                                                      "\n- Scp 3114 Preference\n" +
-                                                                     "\nType \".3114preference [Scp 3114 Preference(1-10)] DNTCONFIRM\" to confirm this message and opt in.";
+                                                                     "\nType \".3114preference [Scp 3114 Preference(0-10)] DNTCONFIRM\" to confirm this message and opt in.";
 
     [Description("The message showed when a player with DNT tries to use the preference command but AllowExplicitDNTOptIn is disabled.")]
     public string PlayerPreferenceDNTDisabled { get; set; } = "You have DNT on! Players with DNT cannot use this feature! Consider turning off DNT to use this feature.";
@@ -56,7 +56,7 @@ public class Translations
     public string PlayerPreferenceSuccess { get; set; } = "Successfully set your 3114 preference to {newPref}";
 
     [Description("This message will be added on to the response whenever a player incorrectly uses the player preference command.")]
-    public string PlayerPreferenceUsage { get; set; } = "\nCommand Usage: \n.3114preference [Scp 3114 Preference (1 - 10)]. Ie: .3114preference 8";
+    public string PlayerPreferenceUsage { get; set; } = "\nCommand Usage: \n.3114preference [Scp 3114 Preference (0 - 10)]. Ie: .3114preference 8";
 
     [Description("This message will be shown when an error occurs while using the player preference command.")]
     public string PlayerPreferenceErrorMessage { get; set; } = "An error has occured and we could not set your player preference. (You must be a player to use this command).";

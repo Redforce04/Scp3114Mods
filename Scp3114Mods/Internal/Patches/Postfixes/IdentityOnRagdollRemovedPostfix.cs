@@ -29,17 +29,26 @@ internal static class IdentityOnRagdollRemovedPostfix
     /// </summary>
     private static void Postfix(Scp3114Identity __instance)
     {
-        if(__instance.CurIdentity.Status != Scp3114Identity.DisguiseStatus.None) return;
-        
-        float cooldown = Scp3114Mods.Singleton.Config.DisguiseCooldown;
-        if (cooldown <= 0)
-            return;
-        if (__instance.Role is not Scp3114Role role)
-            return;
-        if (!role.SubroutineModule.TryGetSubroutine<Scp3114Disguise>(out var disguise) || disguise is null)
-            return;
-        
-        disguise.Cooldown.Trigger(cooldown);
-        Logging.Debug($"Disguise Cooldown Triggered {cooldown}");
+        try
+        {
+
+            if (__instance.CurIdentity.Status != Scp3114Identity.DisguiseStatus.None) return;
+
+            float cooldown = Scp3114Mods.Singleton.Config.DisguiseCooldown;
+            if (cooldown <= 0)
+                return;
+            if (__instance.Role is not Scp3114Role role)
+                return;
+            if (!role.SubroutineModule.TryGetSubroutine<Scp3114Disguise>(out var disguise) || disguise is null)
+                return;
+
+            disguise.Cooldown.Trigger(cooldown);
+            Logging.Debug($"Disguise Cooldown Triggered {cooldown}");
+        }
+        catch (Exception e)
+        {
+            Logging.Debug($"An error has been caught at IdentityOnRagdollRemovedPostfix. Exception: \n{e}");
+
+        }
     }
 }

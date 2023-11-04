@@ -12,6 +12,7 @@
 using HarmonyLib;
 using Mirror;
 using PlayerRoles.PlayableScps.Scp3114;
+using Scp3114Mods.API;
 
 namespace Scp3114Mods.Internal.Patches.Prefixes;
 
@@ -20,31 +21,41 @@ internal static class StrangleServerProcessCmdPrefix
 {
     private static bool Prefix(Scp3114Strangle __instance, NetworkReader reader)
     {
-        //base.ServerProcessCmd(reader);
-        Scp3114Strangle.StrangleTarget? nullable = __instance.ProcessAttackRequest(reader);
-        bool hasValue = nullable.HasValue;
-        if (hasValue != __instance.SyncTarget.HasValue)
+        try
         {
-            if (hasValue)
+
+            //base.ServerProcessCmd(reader);
+            Scp3114Strangle.StrangleTarget? nullable = __instance.ProcessAttackRequest(reader);
+            bool hasValue = nullable.HasValue;
+            if (hasValue != __instance.SyncTarget.HasValue)
             {
-                return true;
-            }
-            else
-            {
-                if (Scp3114Mods.Singleton.Config.StranglePartialCooldown <= 0)
+                if (hasValue)
+                {
+                    return true;
+                }
+                else
+                {
+                    if (Scp3114Mods.Singleton.Config.StranglePartialCooldown <= 0)
+                        return false;
+
+                    /*
+                     * Timing.CallDelayed(Scp3114Mods.Singleton.Config.StranglePartialCooldown, () => {
+                     *      if(__instance is not null) __instance.Cooldown.Clear();
+                     * });
+                     */
+                    __instance.Cooldown.Trigger((double)Scp3114Mods.Singleton.Config.StranglePartialCooldown);
                     return false;
-                
-                /*
-                 * Timing.CallDelayed(Scp3114Mods.Singleton.Config.StranglePartialCooldown, () => {
-                 *      if(__instance is not null) __instance.Cooldown.Clear();
-                 * });
-                 */
-                __instance.Cooldown.Trigger((double) Scp3114Mods.Singleton.Config.StranglePartialCooldown);
-                return false;
+                }
             }
+
+            __instance.SyncTarget = nullable;
+            __instance.ServerSendRpc(true);
+            return false;
         }
-        __instance.SyncTarget = nullable;
-        __instance.ServerSendRpc(true);
-        return false;
+        catch (Exception e)
+        {
+            Logging.Debug($"An error has been caught at StrangleServerProcessCmdPrefix. Exception: \n{e}");
+            return true;
+        }
     }
 }

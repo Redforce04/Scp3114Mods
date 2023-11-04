@@ -14,6 +14,7 @@ using HarmonyLib;
 using InventorySystem;
 using PlayerRoles;
 using PluginAPI.Core;
+using Scp3114Mods.API;
 
 namespace Scp3114Mods.Internal.Patches.Prefixes;
 
@@ -28,12 +29,22 @@ internal static class InventoryCmdDropItemPrefix
     /// </summary>
     private static bool Prefix(Inventory __instance, ushort itemSerial, bool tryThrow)
     {
-        if (!tryThrow)
-            return true;
-        Player ply = Player.Get(__instance._hub);
-        if (ply.Role != RoleTypeId.Scp3114)
+        try
+        {
+
+            if (!tryThrow)
+                return true;
+            Player ply = Player.Get(__instance._hub);
+            if (ply.Role != RoleTypeId.Scp3114)
+                return true;
+
+            return Scp3114Mods.Singleton.Handlers.OnPlayerThrowItem(ply, itemSerial, tryThrow);
+        }
+        catch (Exception e)
+        {
+            Logging.Debug($"An error has been caught at InventoryCmdDropItemPrefix. Exception: \n{e}");
             return true;
 
-        return Scp3114Mods.Singleton.Handlers.OnPlayerThrowItem(ply, itemSerial, tryThrow);
+        }
     }
 }

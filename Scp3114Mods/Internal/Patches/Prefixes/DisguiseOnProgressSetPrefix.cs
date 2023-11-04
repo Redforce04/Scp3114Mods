@@ -32,23 +32,33 @@ internal static class DisguiseOnProgressSetPrefix
     {
         Logging.Debug("Disguise Patch Triggered");
         return true;
-        Scp3114Identity.StolenIdentity curIdentity = __instance.ScpRole.CurIdentity;
-        if (__instance.IsInProgress)
+        try
         {
-            __instance._equipSkinSound.Play();
-            curIdentity.Ragdoll = __instance.CurRagdoll;
-            curIdentity.UnitNameId = (byte)(__instance._prevUnitIds.TryGetValue(__instance.CurRagdoll, out var value) ? value : 0);
-            curIdentity.Status = Scp3114Identity.DisguiseStatus.Equipping;
+
+            Scp3114Identity.StolenIdentity curIdentity = __instance.ScpRole.CurIdentity;
+            if (__instance.IsInProgress)
+            {
+                __instance._equipSkinSound.Play();
+                curIdentity.Ragdoll = __instance.CurRagdoll;
+                curIdentity.UnitNameId =
+                    (byte)(__instance._prevUnitIds.TryGetValue(__instance.CurRagdoll, out var value) ? value : 0);
+                curIdentity.Status = Scp3114Identity.DisguiseStatus.Equipping;
+            }
+            else if (curIdentity.Status == Scp3114Identity.DisguiseStatus.Equipping)
+            {
+                __instance._equipSkinSound.Stop();
+                curIdentity.Status = Scp3114Identity.DisguiseStatus.None;
+                //if (Scp3114Mods.Singleton.Config.DisguiseFailedCooldown != 0)
+                //   __instance.Cooldown.Trigger(Scp3114Mods.Singleton.Config.DisguiseFailedCooldown == -1 ? __instance.Duration : Scp3114Mods.Singleton.Config.DisguiseFailedCooldown);
+                Logging.Debug("Disguise Cooldown Triggered");
+            }
+
+            return false;
         }
-        else if (curIdentity.Status == Scp3114Identity.DisguiseStatus.Equipping)
+        catch (Exception e)
         {
-            __instance._equipSkinSound.Stop();
-            curIdentity.Status = Scp3114Identity.DisguiseStatus.None;
-            //if (Scp3114Mods.Singleton.Config.DisguiseFailedCooldown != 0)
-            //   __instance.Cooldown.Trigger(Scp3114Mods.Singleton.Config.DisguiseFailedCooldown == -1 ? __instance.Duration : Scp3114Mods.Singleton.Config.DisguiseFailedCooldown);
-            Logging.Debug("Disguise Cooldown Triggered");
+            Logging.Debug($"An error has been caught at DisguiseOnProgressSetPrefix. Exception: \n{e}");
         }
-        return false;
-        
+
     }
 }
