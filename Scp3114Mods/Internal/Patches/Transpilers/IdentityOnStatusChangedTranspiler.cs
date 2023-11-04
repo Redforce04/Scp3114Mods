@@ -121,7 +121,18 @@ internal static class IdentityOnStatusChangedTranspiler
 
     private static double GetIdentityDuration(Scp3114Identity _identity)
     {
-        return Scp3114Mods.Singleton.Config.DisguiseDuration;
+
+        float value = Scp3114Mods.Singleton.Config.DisguiseDuration;
+        if (value == 0)
+        {
+            value = _identity._disguiseDurationSeconds;
+        }
+
+        if (value < 0)
+        {
+            value = float.MaxValue;
+        }
+        return value;
     }
 
     private static bool CanClearIdentity(Scp3114Identity _identity)

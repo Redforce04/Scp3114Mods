@@ -20,9 +20,11 @@ public class StrangleFinishedEventArgs
     {
         Attacker = Player.Get(instance.Owner);
         OldTarget = oldTarget;
+        OldTargetPlayer = Player.Get(oldTarget.Target);
         StrangleCooldown = cooldown;
     }
     public Player Attacker { get; set; }
     public Scp3114Strangle.StrangleTarget OldTarget { get; }
+    public Player OldTargetPlayer { get; }
     public float StrangleCooldown { get; set; }
 }

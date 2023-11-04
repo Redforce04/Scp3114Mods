@@ -11,6 +11,7 @@
 
 
 using CommandSystem;
+using PluginAPI.Core;
 
 namespace Scp3114Mods.Internal.Commands;
 
@@ -27,7 +28,7 @@ internal class Better3114Command : ICommand, IUsageProvider
         }
         if (arguments.Count <= 0)
         {
-            response = "You must specify Enable or Disable for this command.";
+            response = "You must specify Enable, Disable or Reload for this command.";
             return false;
         }
 
@@ -43,16 +44,28 @@ internal class Better3114Command : ICommand, IUsageProvider
             response = "Features have been enabled";
             return true;
         }
-
-        if (!Scp3114Mods.Singleton.EventsRegistered)
+        
+        if (arguments.At(0).ToLower() is "false" or "disable" or "disabled" or "0")
         {
-            response = "Features were already disabled";
-            return false;
+            if (!Scp3114Mods.Singleton.EventsRegistered)
+            {
+                response = "Features were already disabled";
+                return false;
+            }
+
+            Scp3114Mods.Singleton.RegisterEvents();
+            response = "Features have been disabled";
+            return true;
+        }
+        if(arguments.At(0).ToLower() is "reload" or "reloadconfigs" or "rc")
+        {
+            PluginHandler.Get(Scp3114Mods.Singleton).ReloadConfig(Scp3114Mods.Singleton);
+            response = "Reloading configs.";
+            return true;
         }
 
-        Scp3114Mods.Singleton.RegisterEvents();
-        response = "Features have been disabled";
-        return true;
+        response = $"Could not find option \"{arguments.At(0)}\"";
+        return false;
     }
 
     public string Command => "Better3114";

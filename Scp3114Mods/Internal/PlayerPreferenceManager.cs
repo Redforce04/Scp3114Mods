@@ -75,9 +75,11 @@ internal class PlayerPreferenceManager
             Logging.Warn($"Cannot get the player preference! Defaults will be used!");
             return Scp3114Mods.Singleton.Config.DefaultPlayerPreference;
         }
-        var preference = GetOrCreatePlayerPreference(ply, 5).Preference;
-        Logging.Debug($"Player Preference: {preference}");
-        return preference;
+        var preference = GetOrCreatePlayerPreference(ply, Scp3114Mods.Singleton.Config.DefaultPlayerPreference, false);
+        if (preference is null)
+            return Scp3114Mods.Singleton.Config.DefaultPlayerPreference;
+        Logging.Debug($"Player Preference: {preference.Preference}");
+        return preference.Preference;
     }
 
     internal void Set3114Preference(Player ply, int preference)
@@ -90,7 +92,7 @@ internal class PlayerPreferenceManager
         GetOrCreatePlayerPreference(ply, preference).Preference = preference;
     }
 
-    private PlayerPreference GetOrCreatePlayerPreference(Player ply, int preferenceInt = 5)
+    private PlayerPreference GetOrCreatePlayerPreference(Player ply, int preferenceInt = 5, bool returnNullIfNotFound = false)
     {
         string userId = ply.UserId;
         
@@ -106,6 +108,7 @@ internal class PlayerPreferenceManager
         
         if (preference is not null)
             return preference;
+        if (returnNullIfNotFound) return null;
 
         return new PlayerPreference(ply.DoNotTrack ? hashId : userId, preferenceInt);
     }
@@ -166,7 +169,7 @@ internal class PlayerPreferenceManager
             get => _preference;
             set
             {
-                _preference = Mathf.Clamp(value, 0, 10);
+                _preference = Mathf.Clamp(value, -5, 5);
                 Singleton._updateLimitRecursion(this, 0);
             }
         }

@@ -33,18 +33,24 @@ public sealed class StranglingPlayerArgs
     {
         Attacker = Player.Get(instance.Owner);
         Target = target;
+        TargetPlayer = Player.Get(target.Target);
         IsAllowed = isAllowed;
     }
 		
     /// <summary>
     /// The player who is Scp3114.
     /// </summary>
-    public Player Attacker { get; set; }
+    public Player Attacker { get; }
 		
     /// <summary>
     /// The player being strangled.
     /// </summary>
-    public Scp3114Strangle.StrangleTarget Target { get; set; }
+    public Scp3114Strangle.StrangleTarget Target { get; }
+    
+    /// <summary>
+    /// The player being targeted.
+    /// </summary>
+    public Player TargetPlayer { get; }
 		
     /// <summary>
     /// Is the event allowed to occur.

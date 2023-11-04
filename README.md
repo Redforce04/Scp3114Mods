@@ -22,18 +22,20 @@ Well Scp3114Modifications has got you covered! It seeks to help balance the hott
 - Fake Item Usage - Scp3114 can pretend to use items.
 - Fake Gun Usage - Scp3114 can pretend to fake shoot guns. The animation and sound effects will even be played! 
 - Custom Ability Cooldowns - You can now change the duration of disguises, and cooldoowns of the Strangle, Slap, and Disguise ability.
-  - Some ability cooldowns even allow for partial cooldowns.
+  - Some abil****ity cooldowns even allow for partial cooldowns.
 - Innocent Protections - protect players from the strangle ability when they don't have a weapon. (Class D / Scientist only)
   - Candy can be defined as a non-innocent item.
 - Empty Hand Protection - Disable strangling for player holding items (like disarming).
   - You can add items to a blacklist to prevent them from counting.
   - This can be toggled on for everyone, or just innocent classes.
 
-## WIP Features:
+## WIP / Planned Features:
 - Spectator Hiding - Hide the role of SCP3114 for spectators.
 - Different Spawn Locations - Spawn in 939 cryo chambers, 049's chambers, test chamber, and more.
 - Radio Usage - Talk to the other team while in disguise.
-- AHP Damage Settings
+- AHP Damage Settings - Allow custom AHP Regeneration options.
+- 049 Revive Corpses. - Allow 049 to revive corpses that have been used as disguises.
+- 049-2 Eat Used Corpses - Allow 049-2 to eat corpses that have been used as disguises.
 
 
 # ***DNT NOTICE***

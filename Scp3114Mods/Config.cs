@@ -70,7 +70,7 @@ public class Config : Exiled.API.Interfaces.IConfig
     public string PlayerPreferenceFileLocation { get; set; } = "";
 
     [Description("Allows players with DNT to opt in to having thier scp 3114 preference stored. Player with DNT will have their userid hashed then stored.")]
-    public bool AllowExplicitDNTOptIn { get; set; } = true;
+    public bool AllowExplicitDntOptIn { get; set; } = true;
 
     [Description("The default player preference for users who haven't opted in, or have DNT enabled.")]
     public int DefaultPlayerPreference { get; set; } = 5;

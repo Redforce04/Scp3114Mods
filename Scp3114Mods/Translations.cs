@@ -30,6 +30,13 @@ public class Translations
     [Description("The message showed when a player tries to strangle a tutorial, and tutorial strangling is disabled.")]
     public string CannotStrangleTutorials { get; set; } = "Cannot strangle tutorials.";
 
+    [Description("The message to show a player when they select a weapon that can be faked.")]
+    public string FakeFiringInform { get; set; } = "You can fake shoot weapons by pressing [T].";
+
+    [Description("The message to show a player when they select a usable item that can be faked.")]
+    public string FakeUsableInform { get; set; } = "You can fake use items by right clicking with your mouse";
+    
+    
     [Description("The message showed when a player tries to use the preference command, but has DNT enabled." +
                  "# If AllowExplicitDNTOptIn is not enabled it will show the PlayerPreferenceDNTDisabled translation instead." +
                  "# {pref} will be replaced with the default player preference, or the player's current preference (if already opted in)")]

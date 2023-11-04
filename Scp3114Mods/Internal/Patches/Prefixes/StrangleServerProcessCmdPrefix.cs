@@ -21,6 +21,7 @@ internal static class StrangleServerProcessCmdPrefix
 {
     private static bool Prefix(Scp3114Strangle __instance, NetworkReader reader)
     {
+        return true;
         try
         {
 

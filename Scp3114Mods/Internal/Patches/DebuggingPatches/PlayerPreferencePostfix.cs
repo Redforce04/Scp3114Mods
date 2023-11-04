@@ -17,13 +17,13 @@ using Scp3114Mods.API;
 
 namespace Scp3114Mods.Internal.Patches.DebuggingPatches;
 
-#if true
+#if false
 [HarmonyPatch(typeof(ScpSpawner), nameof(ScpSpawner.GetPreferenceOfPlayer))]
 internal static class PlayerPreferencePostfix
 {
-    private static void Postfix(ref int __result, ReferenceHub hub, RoleTypeId role)
+    private static void Postfix(ref int __result, ReferenceHub ply, RoleTypeId scp)
     {
-        Logging.Debug($"[Pref: {hub.nicknameSync._firstNickname}@{role} ({__result})]");
+        Logging.Debug($"[Pref: {ply.nicknameSync._firstNickname}@{scp} ({__result})]");
         return;
     }
 }

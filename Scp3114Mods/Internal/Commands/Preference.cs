@@ -34,11 +34,11 @@ internal class Preference : ICommand, IUsageProvider
             return false;
         }
 
-        if (ply.DoNotTrack && (!Scp3114Mods.Singleton.Config.AllowExplicitDNTOptIn || arguments.Count < 2 || arguments.At(1).ToLower() != "dntconfirm"))
+        if (ply.DoNotTrack && (!Scp3114Mods.Singleton.Config.AllowExplicitDntOptIn || arguments.Count < 2 || arguments.At(1).ToLower() != "dntconfirm"))
         {
             var pref = PlayerPreferenceManager.Singleton.Get3114Preference(ply);
-            
-            if (!Scp3114Mods.Singleton.Config.AllowExplicitDNTOptIn)
+            pref += 5;
+            if (!Scp3114Mods.Singleton.Config.AllowExplicitDntOptIn)
             {
                 response = Scp3114Mods.Singleton.Translation.PlayerPreferenceDNTDisabled.Replace("{pref}", pref.ToString());
                 return false;
@@ -49,7 +49,7 @@ internal class Preference : ICommand, IUsageProvider
         }
         if (arguments.Count < 1)
         {
-            var pref = PlayerPreferenceManager.Singleton.Get3114Preference(ply);
+            var pref = PlayerPreferenceManager.Singleton.Get3114Preference(ply) + 5;
             response = Scp3114Mods.Singleton.Translation.PlayerPreferenceCurrentPreference.Replace("{pref}", $"{pref}");
             goto usage;
         }
@@ -59,9 +59,11 @@ internal class Preference : ICommand, IUsageProvider
             response = Scp3114Mods.Singleton.Translation.PlayerPreferenceCouldntDetermineNewPreference.Replace("{arg}", arguments.At(0));
             goto usage;
         }
-        preference = Mathf.Clamp(preference, 0, 10);
+        preference = Mathf.Clamp(preference + 5, 0, 10);
 
-        PlayerPreferenceManager.Singleton.Set3114Preference(ply, preference);
+        // The preference manager stores the value from [-5] - [5], but we do [0] - [10] for simplicity.
+        // This is why we subtract 5.
+        PlayerPreferenceManager.Singleton.Set3114Preference(ply, preference - 5);
         response = Scp3114Mods.Singleton.Translation.PlayerPreferenceSuccess.Replace("{newPref}", preference.ToString());
         return true;
         usage:

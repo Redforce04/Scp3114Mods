@@ -35,6 +35,7 @@ internal static class StrangleProcessAttackRequestPrefix
 	/// </summary>
 	private static bool Prefix(Scp3114Strangle __instance, ref Scp3114Strangle.StrangleTarget? __result, NetworkReader reader)
 	{
+		return true;
 		try
 		{
 			__result = null;

@@ -47,13 +47,13 @@ public class EventHandlers
                     return;
                 if (Scp3114Mods.Singleton.Config.FakeFiringAllowed && item is Firearm)
                 {
-                    _sendMessage(ev.Player, "You can fake shoot weapons by pressing [T].", 4f);
+                    _sendMessage(ev.Player, Scp3114Mods.Singleton.Translation.FakeFiringInform, 4f);
                     return;
                 }
 
                 if (Scp3114Mods.Singleton.Config.FakeUsableInteractions && item is UsableItem)
                 {
-                    _sendMessage(ev.Player,"You can fake use items by right clicking with your mouse", 4f);
+                    _sendMessage(ev.Player,Scp3114Mods.Singleton.Translation.FakeUsableInform, 4f);
                     return;
                 }
             }
@@ -172,8 +172,8 @@ public class EventHandlers
     /// </summary>
     internal void OnStranglingPlayer(StranglingPlayerArgs ev)
     {
+        Logging.Debug($"[Strangle] {ev.Attacker.Nickname} [{ev.Attacker.Role}] -> {ev.TargetPlayer} [{ev.TargetPlayer.Role}]");
         Player target = Player.Get(ev.Target.Target);
-        Logging.Debug($"Target Role: {target.Role}");
         if (Scp3114Mods.Singleton.Config.DisableTutorialsStrangling && target.Role == RoleTypeId.Tutorial)
         {
             Logging.Debug("Strangle Disabled. - Tutorial");

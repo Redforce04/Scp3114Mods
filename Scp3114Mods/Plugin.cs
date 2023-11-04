@@ -41,7 +41,7 @@ public class Scp3114Mods : Plugin<Config, Translations>
     public EventHandlers Handlers { get; set; } = null!;
     
 #if !EXILED
-    [PluginConfig("Translations")] 
+    [PluginConfig("Translations.yml")] 
     public Translations Translation;
 
     [PluginConfig] public Config Config;
@@ -56,6 +56,7 @@ public class Scp3114Mods : Plugin<Config, Translations>
     public void OnEnabled()
 #endif
     {
+        
         Singleton = this;
 
         Logging.Info("Scp3114Mods has been initialized." + (Config.Dbg ? " [Debug]" : ""));
@@ -82,7 +83,7 @@ public class Scp3114Mods : Plugin<Config, Translations>
             RoleAssigner.OnPlayersSpawned -= Scp3114Spawner.OnPlayersSpawned;
         
         API.Events.StranglingPlayer += Handlers.OnStranglingPlayer;
-        API.Events.StranglingPlayer += Handlers.OnStranglingPlayer;
+        API.Events.StrangleFinished += Handlers.OnStrangleFinished;
         EventManager.RegisterEvents(Handlers);
         Harmony.PatchAll();
     }
@@ -108,6 +109,7 @@ public class Scp3114Mods : Plugin<Config, Translations>
     {
         Harmony.UnpatchAll();
         API.Events.StranglingPlayer -= Handlers.OnStranglingPlayer;
+        API.Events.StrangleFinished -= Handlers.OnStrangleFinished;
         EventManager.UnregisterEvents(Handlers);
         EventsRegistered = false;
     }
