@@ -12,8 +12,6 @@
 
 using CustomPlayerEffects;
 using HarmonyLib;
-using InventorySystem.Items.Firearms;
-using InventorySystem.Items.ThrowableProjectiles;
 using Mirror;
 using PlayerRoles;
 using PlayerRoles.FirstPersonControl;
@@ -21,17 +19,16 @@ using PlayerRoles.PlayableScps.Scp3114;
 using PluginAPI.Core;
 using RelativePositioning;
 using Scp3114Mods.API;
-using Scp3114Mods.API.EventArgs;
 using UnityEngine;
 using Utils.Networking;
 
-namespace Scp3114Mods.Internal.Patches;
+namespace Scp3114Mods.Internal.Patches.Prefixes;
 /// <summary>
 /// 
 /// </summary>
 
-[HarmonyPatch(typeof(PlayerRoles.PlayableScps.Scp3114.Scp3114Strangle), nameof(PlayerRoles.PlayableScps.Scp3114.Scp3114Strangle.ProcessAttackRequest))]
-internal static class StranglePatch
+[HarmonyPatch(typeof(Scp3114Strangle), nameof(Scp3114Strangle.ProcessAttackRequest))]
+internal static class StrangleProcessAttackRequestPrefix
 {
 	/// <summary>
 	/// Adds logic for tutorial safety, Empty hand safety, and 

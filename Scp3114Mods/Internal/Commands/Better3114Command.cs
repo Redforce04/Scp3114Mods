@@ -16,7 +16,7 @@ namespace Scp3114Mods.Internal.Commands;
 
 [CommandHandler(typeof(RemoteAdminCommandHandler))]
 [CommandHandler(typeof(GameConsoleCommandHandler))]
-public class Better3114Command : ICommand, IUsageProvider
+internal class Better3114Command : ICommand, IUsageProvider
 {
     public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
     {

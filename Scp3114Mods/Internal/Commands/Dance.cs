@@ -22,7 +22,7 @@ namespace Scp3114Mods.Internal.Commands;
 
 [CommandHandler(typeof(ClientCommandHandler))]
 [CommandHandler(typeof(RemoteAdminCommandHandler))]
-public class Dance : ICommand, IUsageProvider
+internal class Dance : ICommand, IUsageProvider
 {
     public string Command => "dance";
     public string[] Aliases => new [] { "d" };
@@ -96,7 +96,6 @@ public class Dance : ICommand, IUsageProvider
                 response = $"{(isSelf ? "You" : $"Player {ply.Nickname}")} is already dancing.";
                 return false;
             }
-
             dance.DanceVariant = danceNum;
             dance.IsDancing = true;
             dance._serverStartPos = new(ply.Position);

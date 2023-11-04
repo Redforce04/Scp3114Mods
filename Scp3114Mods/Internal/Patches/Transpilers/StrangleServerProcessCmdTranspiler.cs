@@ -14,35 +14,18 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using NorthwoodLib.Pools;
 using PlayerRoles.PlayableScps.Scp3114;
-using PlayerRoles.RoleAssign;
 using Scp3114Mods.API;
 using Scp3114Mods.API.EventArgs;
 using static HarmonyLib.AccessTools;
 
-namespace Scp3114Mods.Internal.Patches;
+namespace Scp3114Mods.Internal.Patches.Transpilers;
 
 [HarmonyPatch(typeof(Scp3114Strangle), nameof(Scp3114Strangle.ServerProcessCmd))]
-internal static class StrangleTranspilerPatch
+internal static class StrangleServerProcessCmdTranspiler
 {
     [HarmonyTranspiler]
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
-        /*
-         * 2- ldfld serveronbegin
-         * 
-         * ldarg.0
-         * ldlocs.a
-         * call nullable.getvalue
-         * box strangletarget
-         * ldc.i4.1
-         * newobj stranglingplayerargs
-         * dup
-         * call OnPlayerStrangling
-         * cllvirt get isallowed
-         * brtrue.s index + 2
-         * ret
-         */
-        
         List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent(instructions);
         Label skipLabel = generator.DefineLabel();
         int index = newInstructions.FindIndex(x => x.opcode == OpCodes.Ldfld && (FieldInfo)x.operand == Field(typeof(Scp3114Strangle), nameof(Scp3114Strangle.ServerOnBegin))) - 1;
@@ -114,34 +97,11 @@ internal static class StrangleTranspilerPatch
     
 }
 [HarmonyPatch(typeof(Scp3114Strangle), nameof(Scp3114Strangle.ServerProcessCmd))]
-internal static class StrangleFinishedTranspilerPatch
+internal static class StrangleServerProcessCmdFinishedTranspiler
 {
     [HarmonyTranspiler]
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
-        /*
-         *IL003D / IL 003E - after ldarg.0 -then remove3 
-         *
-         * ldarg.0
-         * call scp3114strangle.get_SyncTarget
-         * stloc.2
-         * ldloca.s V_2
-         * call Nullable<Scp3114Strangle>.get_Value();
-         * box
-         * ldarg.0
-         * ldfld _postreleasecooldown
-         * ldc.i4.1
-         * newobj stranglefinishedeventargs()
-         * stloc.s ev
-         * ldloc.s ev
-         * call OnStrangleFinished
-         * ldarg.0
-         * ldfld cooldown
-         * ldloc.s ev
-         * get_strangleCooldown
-         * 
-         */
-        
         List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent(instructions);
         LocalBuilder ev = generator.DeclareLocal(typeof(StrangleFinishedEventArgs));
         int index = newInstructions.FindIndex(x => x.opcode == OpCodes.Ldfld && (FieldInfo)x.operand == Field(typeof(Scp3114Strangle), nameof(Scp3114Strangle.Cooldown)));

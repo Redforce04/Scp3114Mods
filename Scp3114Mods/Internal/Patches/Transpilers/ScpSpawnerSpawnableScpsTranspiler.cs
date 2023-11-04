@@ -16,13 +16,12 @@ using NorthwoodLib.Pools;
 using PlayerRoles;
 using PlayerRoles.PlayableScps.Scp3114;
 using PlayerRoles.RoleAssign;
-using PluginAPI.Core;
 using Scp3114Mods.API;
 using static HarmonyLib.AccessTools;
-namespace Scp3114Mods.Internal.Patches;
+namespace Scp3114Mods.Internal.Patches.Transpilers;
 
 [HarmonyPatch(typeof(ScpSpawner),nameof(ScpSpawner.SpawnableScps), MethodType.Getter)]
-internal static class DefaultGameSpawningPatch
+internal static class ScpSpawnerSpawnableScpsTranspiler
 {
     [HarmonyTranspiler]
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)

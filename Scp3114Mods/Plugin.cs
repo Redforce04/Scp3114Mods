@@ -61,9 +61,12 @@ public class Scp3114Mods : Plugin<Config, Translations>
         Logging.Info("Scp3114Mods has been initialized." + (Config.Dbg ? " [Debug]" : ""));
         Handlers = new EventHandlers();
         Harmony = new Harmony("me.redforce04.scp3114mods");
+        Timing.CallDelayed(1f, () =>
+        {
+            var unused = new PlayerPreferenceManager();
+        });
         if (!Config.IsEnabled)
             return;
-        var unused = new PlayerPreferenceManager();
         RegisterEvents();
 #if EXILED
         base.OnEnabled();
@@ -75,8 +78,10 @@ public class Scp3114Mods : Plugin<Config, Translations>
         EventsRegistered = true;
 
         // UnRegister NWSpawnScp3114
-        RoleAssigner.OnPlayersSpawned -= Scp3114Spawner.OnPlayersSpawned;
+        if(!Config.SpawnFromHumanRoles)
+            RoleAssigner.OnPlayersSpawned -= Scp3114Spawner.OnPlayersSpawned;
         
+        API.Events.StranglingPlayer += Handlers.OnStranglingPlayer;
         API.Events.StranglingPlayer += Handlers.OnStranglingPlayer;
         EventManager.RegisterEvents(Handlers);
         Harmony.PatchAll();

@@ -11,7 +11,10 @@
 // -----------------------------------------
 
 using System.ComponentModel;
+using MEC;
 using PlayerRoles;
+using PluginAPI.Helpers;
+using Scp3114Mods.API;
 using YamlDotNet.Serialization;
 
 namespace Scp3114Mods;
@@ -22,6 +25,34 @@ public class Config
 public class Config : Exiled.API.Interfaces.IConfig
 #endif
 {
+    public Config()
+    {
+#if !EXILED
+        string basePath = Path.Combine(Paths.GlobalPlugins.Plugins, "Scp3114Mods");
+#else
+        string basePath = Path.Combine(Exiled.API.Features.Paths.Configs, "Scp3114Mods");
+#endif
+        try
+        {
+            if (!Directory.Exists(basePath))
+                Directory.CreateDirectory(basePath);
+            this.PlayerPreferenceFileLocation = Path.Combine(basePath, "Scp3114PlayerPreferences.txt");
+            if (!File.Exists(PlayerPreferenceFileLocation))
+                File.Create(PlayerPreferenceFileLocation);
+        }
+        catch (Exception e)
+        {
+            string message =
+                $"Cannot load basepath \nBase Path: \"{basePath}\"\n File Location:\"{PlayerPreferenceFileLocation}\"\nExceptions: \n{e}";
+            Timing.CallDelayed(1f, () =>
+            {
+                Logging.Debug(message);
+            });
+            // this exception doesnt matter, as it is a pre-serialization value. IE. player configs havent loaded, so they may fix the problem outright.
+        }
+        
+
+    }
     [YamlIgnore]
     public static bool Dbg
     {
@@ -38,6 +69,12 @@ public class Config : Exiled.API.Interfaces.IConfig
     [Description("Where the player preference file should be located.")]
     public string PlayerPreferenceFileLocation { get; set; } = "";
 
+    [Description("Allows players with DNT to opt in to having thier scp 3114 preference stored. Player with DNT will have their userid hashed then stored.")]
+    public bool AllowExplicitDNTOptIn { get; set; } = true;
+
+    [Description("The default player preference for users who haven't opted in, or have DNT enabled.")]
+    public int DefaultPlayerPreference { get; set; } = 5;
+    
     [Description("If true, players will be notified of gameplay mechanics with hints. If false, broadcasts will be used.")]
     public bool UseHintsInsteadOfBroadcasts { get; set; } = true;
 
@@ -106,9 +143,9 @@ public class Config : Exiled.API.Interfaces.IConfig
     [Description("How long shoud disguises last before being destroyed. -1 is infinite, and 0 is game default.")]
     public float DisguiseDuration { get; set; } = 0;
 
-    // doesnt work
-    //[Description("How long the cooldown between new disguises lasts. 0 disabled.")]
-    // public float DisguiseCooldown { get; set; } = -1;
+    [Description("How long the cooldown between new disguises lasts. 0 disabled.")]
+    public float DisguiseCooldown { get; set; } = -1;
+    
     //[Description("How long the cooldown after a failed disguis lasts. -1 is game default.")]
     //public float DisguiseFailedCooldown { get; set; } = -1;
 

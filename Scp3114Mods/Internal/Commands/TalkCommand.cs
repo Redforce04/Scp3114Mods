@@ -22,7 +22,7 @@ namespace Scp3114Mods.Internal.Commands;
 
 [CommandHandler(typeof(ClientCommandHandler))]
 [CommandHandler(typeof(RemoteAdminCommandHandler))]
-public class TalkCommand : ICommand, IUsageProvider
+internal class TalkCommand : ICommand, IUsageProvider
 {
     public string Command => "talk";
     public string[] Aliases => new [] { "t", "say" };

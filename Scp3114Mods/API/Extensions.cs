@@ -102,7 +102,7 @@ public static class Extensions
         disguise._identity.RemainingDuration.NextUse = NetworkTime.time - 1;
         disguise._identity.CurIdentity.Status = Scp3114Identity.DisguiseStatus.Active;
         disguise._identity.ServerResendIdentity();
-        disguise._identity.RemainingDuration.Trigger(Scp3114Mods.Singleton.Config.DisguiseDuration);
+        //disguise._identity.RemainingDuration.Trigger(Scp3114Mods.Singleton.Config.DisguiseDuration );
         disguise._identity._wasDisguised = true;
         
         disguise._identity.OnIdentityStatusChanged();

@@ -19,7 +19,7 @@ namespace Scp3114Mods.Internal.Commands;
 
 [CommandHandler(typeof(RemoteAdminCommandHandler))]
 [CommandHandler(typeof(GameConsoleCommandHandler))]
-public class Scp3114CooldownCommand : ICommand, IUsageProvider
+internal class Scp3114CooldownCommand : ICommand, IUsageProvider
 {
     public string Command => "3114_cooldown";
     public string[] Aliases => Array.Empty<string>();

@@ -12,14 +12,14 @@
 using System.Reflection.Emit;
 using HarmonyLib;
 using NorthwoodLib.Pools;
-using PlayerRoles.PlayableScps.Scp3114;
+using PluginAPI.Core;
 using Scp3114Mods.API;
 using static HarmonyLib.AccessTools;
 
-namespace Scp3114Mods.Internal.Patches;
+namespace Scp3114Mods.Internal.Patches.Transpilers;
 
 [HarmonyPatch(typeof(PlayerRoles.RoleAssign.ScpSpawner), nameof(PlayerRoles.RoleAssign.ScpSpawner.GetPreferenceOfPlayer))]
-public static class GetPlayerPreferencePatch
+internal static class ScpSpawnerGetPreferenceOfPlayerTranspiler
 {
     [HarmonyTranspiler]
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
@@ -37,7 +37,7 @@ public static class GetPlayerPreferencePatch
             new (OpCodes.Ldc_I4_S, 23),
             new (OpCodes.Bne_Un_S, label),
             new (OpCodes.Ldarg_0),
-            new (OpCodes.Call, Method(typeof(GetPlayerPreferencePatch),nameof(GetPlayerPreferencePatch.GetPlayerPreferenceOf3114))),
+            new (OpCodes.Call, Method(typeof(ScpSpawnerGetPreferenceOfPlayerTranspiler),nameof(ScpSpawnerGetPreferenceOfPlayerTranspiler.GetPlayerPreferenceOf3114))),
             new (OpCodes.Ret),
         };
         
@@ -83,8 +83,12 @@ public static class GetPlayerPreferencePatch
         return $"[{index:000} {injectedString}] {instruction.opcode,-10}{labelOperand,-7}{notedLabels}";
     }
 
-    public static int GetPlayerPreferenceOf3114(ReferenceHub hub)
+    internal static int GetPlayerPreferenceOf3114(ReferenceHub hub)
     {
-        return 1;
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (PlayerPreferenceManager.Singleton is null)
+            return 5;
+        
+        return PlayerPreferenceManager.Singleton.Get3114Preference(Player.Get(hub));
     }
 }

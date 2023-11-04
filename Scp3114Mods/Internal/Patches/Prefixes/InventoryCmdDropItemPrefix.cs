@@ -15,13 +15,13 @@ using InventorySystem;
 using PlayerRoles;
 using PluginAPI.Core;
 
-namespace Scp3114Mods.Internal.Patches;
+namespace Scp3114Mods.Internal.Patches.Prefixes;
 
 /// <summary>
 /// Patches for scp3114 dropping item. This is used to trigger fake shooting.
 /// </summary>
 [HarmonyPatch(typeof(Inventory), nameof(Inventory.UserCode_CmdDropItem__UInt16__Boolean))]
-internal static class DropItemPatch
+internal static class InventoryCmdDropItemPrefix
 {
     /// <summary>
     /// The logic may need to be re-worked as some players want to be able to throw items like the vase.

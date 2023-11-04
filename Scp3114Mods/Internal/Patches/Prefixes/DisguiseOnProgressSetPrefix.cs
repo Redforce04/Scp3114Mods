@@ -12,15 +12,15 @@
 
 using HarmonyLib;
 using PlayerRoles.PlayableScps.Scp3114;
-using PluginAPI.Core;
+using Scp3114Mods.API;
 
-namespace Scp3114Mods.Internal.Patches;
+namespace Scp3114Mods.Internal.Patches.Prefixes;
 
 /// <summary>
 /// Patches for the Disguise Progress Set.
 /// </summary>
 [HarmonyPatch(typeof(Scp3114Disguise), nameof(Scp3114Disguise.OnProgressSet))]
-internal static class DisguiseProgressSetPatch
+internal static class DisguiseOnProgressSetPrefix
 {
     
     /// <summary>
@@ -30,8 +30,8 @@ internal static class DisguiseProgressSetPatch
     /// </summary>
     private static bool Prefix(Scp3114Disguise __instance)
     {
+        Logging.Debug("Disguise Patch Triggered");
         return true;
-        /*
         Scp3114Identity.StolenIdentity curIdentity = __instance.ScpRole.CurIdentity;
         if (__instance.IsInProgress)
         {
@@ -44,11 +44,11 @@ internal static class DisguiseProgressSetPatch
         {
             __instance._equipSkinSound.Stop();
             curIdentity.Status = Scp3114Identity.DisguiseStatus.None;
-            if (Scp3114Mods.Singleton.Config.DisguiseFailedCooldown != 0)
-                __instance.Cooldown.Trigger(Scp3114Mods.Singleton.Config.DisguiseFailedCooldown == -1 ? __instance.Duration : Scp3114Mods.Singleton.Config.DisguiseFailedCooldown);
+            //if (Scp3114Mods.Singleton.Config.DisguiseFailedCooldown != 0)
+            //   __instance.Cooldown.Trigger(Scp3114Mods.Singleton.Config.DisguiseFailedCooldown == -1 ? __instance.Duration : Scp3114Mods.Singleton.Config.DisguiseFailedCooldown);
             Logging.Debug("Disguise Cooldown Triggered");
         }
         return false;
-        */
+        
     }
 }

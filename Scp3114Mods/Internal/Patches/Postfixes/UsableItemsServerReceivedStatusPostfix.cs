@@ -20,13 +20,13 @@ using PluginAPI.Core;
 using Scp3114Mods.API;
 using Utils.Networking;
 
-namespace Scp3114Mods.Internal.Patches;
+namespace Scp3114Mods.Internal.Patches.Postfixes;
 
 /// <summary>
 /// Processes fake item usage.
 /// </summary>
-[HarmonyPatch(typeof(InventorySystem.Items.Usables.UsableItemsController), nameof(InventorySystem.Items.Usables.UsableItemsController.ServerReceivedStatus))]
-internal class UseItemPatch
+[HarmonyPatch(typeof(UsableItemsController), nameof(UsableItemsController.ServerReceivedStatus))]
+internal class UsableItemsServerReceivedStatusPostfix
 {
     private static void Postfix(NetworkConnection conn, StatusMessage msg)
     {

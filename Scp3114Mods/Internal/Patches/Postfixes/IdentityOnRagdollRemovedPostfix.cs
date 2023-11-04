@@ -12,16 +12,16 @@
 
 using HarmonyLib;
 using PlayerRoles.PlayableScps.Scp3114;
-using PluginAPI.Core;
+using Scp3114Mods.API;
 
-namespace Scp3114Mods.Internal.Patches;
+namespace Scp3114Mods.Internal.Patches.Postfixes;
 
 
 /// <summary>
 /// Patches for setting a disguise cooldown.
 /// </summary>
 [HarmonyPatch(typeof(Scp3114Identity),nameof(Scp3114Identity.OnRagdollRemoved))]
-internal static class DisguiseRemovedPatch
+internal static class IdentityOnRagdollRemovedPostfix
 {
     /// <summary>
     /// Allows us to set a custom cooldown after the disguise is removed.
@@ -29,9 +29,9 @@ internal static class DisguiseRemovedPatch
     /// </summary>
     private static void Postfix(Scp3114Identity __instance)
     {
-        return;/*
+        if(__instance.CurIdentity.Status != Scp3114Identity.DisguiseStatus.None) return;
+        
         float cooldown = Scp3114Mods.Singleton.Config.DisguiseCooldown;
-        Logging.Debug($"Processing Disguise Cooldown {cooldown}");
         if (cooldown <= 0)
             return;
         if (__instance.Role is not Scp3114Role role)
@@ -40,6 +40,6 @@ internal static class DisguiseRemovedPatch
             return;
         
         disguise.Cooldown.Trigger(cooldown);
-        Logging.Debug($"Disguise Cooldown Triggered {cooldown}");*/
+        Logging.Debug($"Disguise Cooldown Triggered {cooldown}");
     }
 }

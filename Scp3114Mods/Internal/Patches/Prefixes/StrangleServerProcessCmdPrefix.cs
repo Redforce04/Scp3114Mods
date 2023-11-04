@@ -13,10 +13,10 @@ using HarmonyLib;
 using Mirror;
 using PlayerRoles.PlayableScps.Scp3114;
 
-namespace Scp3114Mods.Internal.Patches;
+namespace Scp3114Mods.Internal.Patches.Prefixes;
 
 [HarmonyPatch(typeof(Scp3114Strangle), nameof(Scp3114Strangle.ServerProcessCmd))]
-internal static class StrangleProcessCommandPatch
+internal static class StrangleServerProcessCmdPrefix
 {
     private static bool Prefix(Scp3114Strangle __instance, NetworkReader reader)
     {

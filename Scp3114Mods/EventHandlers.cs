@@ -79,13 +79,13 @@ public class EventHandlers
         // Spoof player role for spectators if config is enabled.
         if (ev.NewRole == RoleTypeId.Spectator)
         {
-            _hide3114ForSpectator(ev.Player);
+            //_hide3114ForSpectator(ev.Player);
         }   
 
         // Un-Spoof player role for spectators if config is enabled.
         if (ev.OldRole.RoleTypeId == RoleTypeId.Spectator)
         {
-            _show3114ForPlayer(ev.Player);
+            //_show3114ForPlayer(ev.Player);
         }
         skipSpectatorCheck:
         if (ev.NewRole != RoleTypeId.Scp3114)
@@ -93,21 +93,6 @@ public class EventHandlers
         // Check strangle cooldown.
         try
         {
-            Logging.Debug("Scp 3114 processing actions");
-            if (Scp3114Mods.Singleton.Config.StranglePartialCooldown > 0)
-            {
-                Timing.CallDelayed(.1f, () =>
-                {
-                    if (!(ev.Player.RoleBase is not Scp3114Role role ||
-                          !role.SubroutineModule.TryGetSubroutine<Scp3114Strangle>(out var strangle) ||
-                          strangle is null))
-                        strangle._postReleaseCooldown = Scp3114Mods.Singleton.Config.StranglePartialCooldown;
-                });
-            }
-            if (Scp3114Mods.Singleton.Config.DisguiseDuration != 0)
-            {
-                Timing.CallDelayed(.1f, () => ev.Player.SetDisguisePermanentDuration(Scp3114Mods.Singleton.Config.DisguiseDuration == -1 ? float.MaxValue : Scp3114Mods.Singleton.Config.DisguiseDuration));
-            }
             if(Scp3114Mods.Singleton.Config.StartInDisguiseOfSelf)
                 Timing.CallDelayed(.1f, () => ev.Player.SetDisguise(ev.Player.Nickname, UnityEngine.Random.Range(0, 4) == 1 ? RoleTypeId.Scientist : RoleTypeId.ClassD));
         }
@@ -171,12 +156,21 @@ public class EventHandlers
             Logging.Debug($"Exception: \n{e}");
         }
     }
-
+    
+    /// <summary>
+    /// Process strangle finished info, and applies a proper strangle cooldown.
+    /// </summary>
+    internal void OnStrangleFinished(StrangleFinishedEventArgs ev)
+    {
+        if (!ev.OldTarget.Target.IsAlive())
+            return;
+        ev.StrangleCooldown = Scp3114Mods.Singleton.Config.StranglePartialCooldown;
+    }
 
     /// <summary>
     /// Processes Strangle Information.
     /// </summary>
-    public void OnStranglingPlayer(StranglingPlayerArgs ev)
+    internal void OnStranglingPlayer(StranglingPlayerArgs ev)
     {
         Player target = Player.Get(ev.Target.Target);
         Logging.Debug($"Target Role: {target.Role}");

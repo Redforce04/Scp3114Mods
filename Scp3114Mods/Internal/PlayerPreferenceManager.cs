@@ -18,22 +18,43 @@ using Scp3114Mods.API;
 
 namespace Scp3114Mods.Internal;
 
-public class PlayerPreferenceManager
+internal class PlayerPreferenceManager
 {
-    public static PlayerPreferenceManager Singleton;
+    internal static PlayerPreferenceManager Singleton;
     private CoroutineHandle loadingCoroutine;
     private CoroutineHandle updateCoroutine;
-    private List<PreferenceToUpdate> _preferencesToUpdate = new List<PreferenceToUpdate>();
     internal string FileLocation { get; set; } = null!;
+    private bool init = false;
     private List<PlayerPreference> _preferences = new List<PlayerPreference>();
-    public PlayerPreferenceManager()
+    internal PlayerPreferenceManager()
     {
         Singleton = this;
-        FileLocation = "";
-        _loadAllInstances();
+        FileLocation = Scp3114Mods.Singleton.Config.PlayerPreferenceFileLocation;
+        try
+        {
+            if(!File.Exists(Scp3114Mods.Singleton.Config.PlayerPreferenceFileLocation))
+                File.Create(Scp3114Mods.Singleton.Config.PlayerPreferenceFileLocation).Close();
+            Logging.Debug($"Player Preferences Location: {Scp3114Mods.Singleton.Config.PlayerPreferenceFileLocation}");
+            _loadAllInstances();
+        }
+        catch (DirectoryNotFoundException)
+        {
+            Logging.Error(
+                "Cannot find the base directory or file to store the player-preference data. Please check your configs and ensure it can be read/written to, and that it is in a valid location. (For pterodactyl users it must be in [/home/container/*]");
+        }
+        catch (UnauthorizedAccessException)
+        {
+            Logging.Error(
+                $"Cannot write to the base-directory or file for player-preference data. Ensure that the default location, or location set in configs, can be written/read to.");
+        }
+        catch (Exception e)
+        {
+            Logging.Error("Could not load player preference file. Please check your configs and ensure it can be read/written to, and that it is in a valid location. (For pterodactyl users it must be in [/home/container/*]");
+            Logging.Debug($"Exception: \n{e}");
+        }
     }
 
-    public void Deconstruct()
+    internal void Deconstruct()
     {
         if (loadingCoroutine.IsRunning)
         {
@@ -46,13 +67,25 @@ public class PlayerPreferenceManager
         }
     }
 
-    public float Get3114Preference(Player ply)
+    internal int Get3114Preference(Player ply)
     {
-        return GetOrCreatePlayerPreference(ply, 5).Preference;
+        if (!init)
+        {
+            Logging.Warn($"Cannot get the player preference! Defaults will be used!");
+            return Scp3114Mods.Singleton.Config.DefaultPlayerPreference;
+        }
+        var preference = GetOrCreatePlayerPreference(ply, 5).Preference;
+        Logging.Debug($"Player Preference: {preference}");
+        return preference;
     }
 
-    public void Set3114Preference(Player ply, int preference)
+    internal void Set3114Preference(Player ply, int preference)
     {
+        if (!init)
+        {
+            Logging.Warn("Cannot update the player preference!");
+            return;
+        }
         GetOrCreatePlayerPreference(ply, preference).Preference = preference;
     }
 
@@ -76,27 +109,23 @@ public class PlayerPreferenceManager
         return new PlayerPreference(ply.DoNotTrack ? hashId : userId, preferenceInt);
     }
 
-        
-    private void _updatePlayerPreference(PlayerPreference preference, int newValue, int lineLoc = -1)
-    {
-        var val = new PreferenceToUpdate(preference, newValue, lineLoc);
-        if (updateCoroutine.IsRunning)
-        {
-
-            Timing.CallDelayed(3f, () => { _updateLimitRecursion(val, 1); });
-            return;
-        }
-        Timing.RunCoroutine(_updateCoroutine(val), "Player Preference Update Coroutine");
-    }
-
-    private void _updateLimitRecursion(PreferenceToUpdate pref, int iteration)
+    private void _updateLimitRecursion(PlayerPreference pref, int iteration)
     {
         if (iteration >= 3)
         {
-            Log.Warning($"Cannot update {pref.Preference.PlayerId}");
+            Log.Warning($"Cannot update {pref.PlayerId}");
             Log.Debug("3rd update iteration, killing recursion.");
             return;
         }
+        if (Singleton.updateCoroutine.IsRunning)
+        {
+            Timing.CallDelayed(3f, () =>
+            {
+                _updateLimitRecursion(pref, iteration + 1);
+            });
+            return;
+        }
+        Timing.RunCoroutine(_updateCoroutine(), "Player Preference Update Coroutine");
     }
     
 #region Hashing
@@ -118,12 +147,10 @@ public class PlayerPreferenceManager
 #region PlayerPreference
     private protected class PlayerPreference
     {
-        internal PlayerPreference(string playerId, int preference, bool saveToFile = true, int lineLoc = -1)
+        internal PlayerPreference(string playerId, int preference, bool saveToFile = true)
         {
             PlayerId = playerId;
             _preference = preference;
-            if (lineLoc != -1)
-                _lineLoc = lineLoc;
             PlayerPreferenceManager.Singleton._preferences.Add(this);
             if(saveToFile)
                 _savePlayerPreference();
@@ -131,7 +158,6 @@ public class PlayerPreferenceManager
 
         public override string ToString() => $"{PlayerId}, {Preference},\n";
 
-        private int _lineLoc;
         private int _preference;
         internal string PlayerId { get; } // shouldn't ever be changed.
         internal int Preference
@@ -139,11 +165,8 @@ public class PlayerPreferenceManager
             get => _preference;
             set
             {
-                if (value == _preference)
-                    return;
-                value = _preference;
-                    //_updatePlayerPreference();
-
+                _preference = value;
+                Singleton._updateLimitRecursion(this, 0);
             }
         }
         private void _savePlayerPreference()
@@ -156,6 +179,7 @@ public class PlayerPreferenceManager
         private void _loadAllInstances() => this.loadingCoroutine = Timing.RunCoroutine(_instanceLoadingCoroutine(), "Player Preference Instance Loading Coroutine");
         private IEnumerator<float> _instanceLoadingCoroutine()
         {
+            
             Logging.Debug("Loading Player Preferences.");
             StreamReader stream = new StreamReader(File.Open(PlayerPreferenceManager.Singleton.FileLocation, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite));
             // define these here so we dont reallocate for each iteration
@@ -176,7 +200,7 @@ public class PlayerPreferenceManager
                     continue;
                 }
                 // Makes this more or less "async" - won't hold the thread up for ages aka seconds. Every 4 lines - yield.
-                if (readsSinceDelay > 4)
+                if (readsSinceDelay > 20)
                 {
                     readsSinceDelay = 0;
                     yield return Timing.WaitForOneFrame;
@@ -202,7 +226,7 @@ public class PlayerPreferenceManager
 
                     try
                     {
-                        new PlayerPreference(cache, value, false, lineNum);
+                        var unused = new PlayerPreference(cache, value, false);
                         cache = "";
                     }
                     catch (Exception e)
@@ -220,30 +244,29 @@ public class PlayerPreferenceManager
                 }
             }
             stream.Close();
-            Logging.Debug($"Loaded {_preferences.Count} player preferences.");
+            Logging.Info($"Loaded {_preferences.Count} player preferences.");
+            init = true;
         }
 
-        private IEnumerator<float> _updateCoroutine(PreferenceToUpdate preference)
+        private IEnumerator<float> _updateCoroutine()
         {
+            StreamWriter stream = new StreamWriter(File.Open(PlayerPreferenceManager.Singleton.FileLocation, FileMode.Truncate, FileAccess.ReadWrite, FileShare.ReadWrite));
+            int i = 0;
             foreach (var x in _preferences)
             {
+                if (i > 20)
+                {
+                    i = 0;
+                    yield return Timing.WaitForOneFrame;
+                }
+                i++;
+                if(x is null)
+                    continue;
                 
+                stream.Write(x.ToString());
             }
-
+            stream.Close();
             yield break;
         }
-
-        private struct PreferenceToUpdate
-        {
-            internal PreferenceToUpdate(PlayerPreference pref, int newValue, int line = -1)
-            {
-                Preference = pref;
-                NewValue = newValue;
-                LineLoc = line;
-            }
-            internal PlayerPreference Preference;
-            internal int LineLoc = -1;
-            internal int NewValue = 5;
-        }
-#endregion
+        #endregion
 }

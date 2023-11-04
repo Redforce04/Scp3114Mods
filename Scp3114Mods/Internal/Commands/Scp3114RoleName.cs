@@ -20,7 +20,7 @@ namespace Scp3114Mods.Internal.Commands;
 
 [CommandHandler(typeof(RemoteAdminCommandHandler))]
 [CommandHandler(typeof(GameConsoleCommandHandler))]
-public class Scp3114RoleName : ICommand, IUsageProvider
+internal class Scp3114RoleName : ICommand, IUsageProvider
 {
     public string Command => "3114_role_name";
     public string[] Aliases => Array.Empty<string>();

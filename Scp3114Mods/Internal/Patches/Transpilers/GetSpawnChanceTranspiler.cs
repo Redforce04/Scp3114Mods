@@ -16,15 +16,14 @@ using NorthwoodLib.Pools;
 using PlayerRoles;
 using PlayerRoles.PlayableScps;
 using PlayerRoles.RoleAssign;
-using PluginAPI.Core;
 using Scp3114Mods.API;
 using static HarmonyLib.AccessTools;
 
-namespace Scp3114Mods.Internal.Patches;
+namespace Scp3114Mods.Internal.Patches.Transpilers;
 
 
-[HarmonyPatch(typeof(ScpSpawner),nameof(ScpSpawner.NextScp), MethodType.Getter)]
-internal static class GetSpawnChancePatch
+
+internal static class ScpSpawnerGetNextScpTranspiler
 {
     [HarmonyTranspiler]
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
@@ -49,7 +48,7 @@ internal static class GetSpawnChancePatch
         var injectedInstructions = new CodeInstruction[]
         {
             new (OpCodes.Ldsfld, Field(typeof(ScpSpawner), nameof(ScpSpawner.EnqueuedScps))),
-            new (OpCodes.Call, Method(typeof(GetSpawnChancePatch), nameof(GetSpawnChancePatch._getChance))),
+            new (OpCodes.Call, Method(typeof(ScpSpawnerGetNextScpTranspiler), nameof(ScpSpawnerGetNextScpTranspiler._getChance))),
         };
         
         const bool debug = false;
