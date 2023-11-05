@@ -27,6 +27,7 @@ internal static class IdentityOnRagdollRemovedPostfix
     /// Allows us to set a custom cooldown after the disguise is removed.
     /// This needs some testing.
     /// </summary>
+    [HarmonyPostfix]
     private static void Postfix(Scp3114Identity __instance)
     {
         try

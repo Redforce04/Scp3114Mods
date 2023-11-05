@@ -27,6 +27,7 @@ internal static class InventoryCmdDropItemPrefix
     /// <summary>
     /// The logic may need to be re-worked as some players want to be able to throw items like the vase.
     /// </summary>
+    [HarmonyPrefix]
     private static bool Prefix(Inventory __instance, ushort itemSerial, bool tryThrow)
     {
         try

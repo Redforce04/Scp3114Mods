@@ -28,6 +28,7 @@ namespace Scp3114Mods.Internal.Patches.Postfixes;
 [HarmonyPatch(typeof(UsableItemsController), nameof(UsableItemsController.ServerReceivedStatus))]
 internal class UsableItemsServerReceivedStatusPostfix
 {
+    [HarmonyPostfix]
     private static void Postfix(NetworkConnection conn, StatusMessage msg)
     {
         try

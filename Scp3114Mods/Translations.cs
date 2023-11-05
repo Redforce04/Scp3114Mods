@@ -21,28 +21,62 @@ public class Translations : Exiled.API.Interfaces.ITranslation
 public class Translations
 #endif
 {
-    [Description("Many of these messages will only be shown when the relevant config is applied.\n" +
+    [Description("Note: Many of these messages will only be shown when the relevant config is applied." +
+                 "\n\n\n# ====================== [Failed Strangle Messages] ======================\n" +
+                 "# [Innocent Player]\n" +
                  "# The message showed when a player tries to strangle an innocent player with an empty hand.")]
     public string CannotStrangleInnocentPlayer { get; set; } = $"Cannot strangle innocent players. They must have a weapon or candy.";
-    [Description("The message showed when a player tries to strangle an innocent player with an empty hand.")]
+    
+    
+    [Description("\n\n# [Empty Hand]\n" +
+                 "# The message showed when a player tries to strangle an innocent player with an empty hand.")]
     public string CannotStrangleInnocentPlayerEmptyHand { get; set; } = $"Innocent players must have an empty hand to be strangled.";
+    
     [Description("The message showed when a player tries to strangle another player with an empty hand.")]
     public string CannotStranglePlayerEmptyHand { get; set; } = $"Players must have an empty hand to be strangled.";
-    [Description("The message showed when a player tries to strangle a tutorial, and tutorial strangling is disabled.")]
+    
+    
+    [Description("\n\n# [Tutorial Strangling]\n" +
+                 "# The message showed when a player tries to strangle a tutorial, and tutorial strangling is disabled.")]
     public string CannotStrangleTutorials { get; set; } = "Cannot strangle tutorials.";
-
-    [Description("The message to show a player when they select a weapon that can be faked.")]
+    
+    
+    
+    
+    
+    [Description("\n\n\n# ====================== [Fake Item Usage] ======================\n" +
+                 "# [Fake Firing]\n" +
+                 "# The message to show a player when they select a weapon that can be faked.")]
     public string FakeFiringInform { get; set; } = "You can fake shoot weapons by pressing [T].";
 
-    [Description("The message to show a player when they select a usable item that can be faked.")]
+    
+    [Description("\n\n# [Fake Usables]\n" +
+                 "# The message to show a player when they select a usable item that can be faked.")]
     public string FakeUsableInform { get; set; } = "You can fake use items by right clicking with your mouse";
 
+    
+    
+    
+    
+    [Description("\n\n\n# ====================== [Infinite Disguises] ======================\n" +
+                 "# The message to show a player when they equip a disguise, and infinite disguises are enabled.\n" +
+                 "# \'{role}\' will be replaces with the role the selected.")]
     public string InfiniteDisguisesEnabled { get; set; } = "Infinite disguises are enabled. A cooldown will not be shown.\nCurrent Disguise: {role}";
     
-    [Description("The message showed when a player tries to use the preference command, but has DNT enabled." +
-                 "# If AllowExplicitDNTOptIn is not enabled it will show the PlayerPreferenceDNTDisabled translation instead." +
-                 "# {pref} will be replaced with the default player preference, or the player's current preference (if already opted in)")]
-    public string PlayerPreferenceCmdDNTOptInMessage { get; set; } = "You have Do-Not-Track On! You can still opt into this feature! If not, the default preference is {pref}." +
+    
+    
+    
+    
+    [Description("\n\n\n# ====================== [Player Preference Command] ======================\n" +
+                 "# This message will be added on to the response whenever a player incorrectly uses the player preference command.")]
+    public string PlayerPreferenceUsage { get; set; } = "\nCommand Usage: \n.3114preference [Scp 3114 Preference (0 - 10)]. Ie: .3114preference 8";
+    
+    
+    [Description("\n\n# [DNT Opt In]\n" +
+                 "# The message showed when a player tries to use the preference command, but has DNT enabled.\n" +
+                 "# If AllowExplicitDNTOptIn is not enabled it will show the PlayerPreferenceDNTDisabled translation instead.\n" +
+                 "# \'{pref}\' will be replaced with the default player preference, or the player's current preference (if already opted in)")]
+    public string PlayerPreferenceCmdDntOptInMessage { get; set; } = "You have Do-Not-Track On! You can still opt into this feature! If not, the default preference is {pref}." +
                                                                      "\n- When opting in, your userid will be secured in a unreversible manner (hashing)." +
                                                                      "\n- This means server staff and administration won't be able to track your user id." +
                                                                      "\n\n- It is still possible to find your preference, if they already know your user id." +
@@ -50,27 +84,36 @@ public class Translations
                                                                      "\n- UserId" +
                                                                      "\n- Scp 3114 Preference\n" +
                                                                      "\nType \".3114preference [Scp 3114 Preference(0-10)] DNTCONFIRM\" to confirm this message and opt in.";
-
-    [Description("The message showed when a player with DNT tries to use the preference command but AllowExplicitDNTOptIn is disabled.")]
-    public string PlayerPreferenceDNTDisabled { get; set; } = "You have DNT on! Players with DNT cannot use this feature! Consider turning off DNT to use this feature.";
-
-    [Description("The result for the preference command when the player doesnt specify a new preference. {pref} will be replaced with their prior preference.")]
-    public string PlayerPreferenceCurrentPreference { get; set; } = "Current preference level: {pref}. \nTo set a new preference, please specify the new preference level.";
-
-    [Description("The result for the preference command when the new preference cannot be determined. {arg} will be replaced with the failed input they tried to select.")]
-    public string PlayerPreferenceCouldntDetermineNewPreference { get; set; } = "Could not determine the desired preference from \"{arg}\". Ensure it is a number with no decimals.";
-
     
-    [Description("The result for the preference command when the new preference was successfully set. {newPref} will be replaced with the new preference.")]
+    
+    [Description("\n\n# [Success Messages]\n" +
+                 "# The result for the preference command when the player doesnt specify a new preference. \n" +
+                 "# \'{pref}\' will be replaced with their prior preference.")]
+    public string PlayerPreferenceCurrentPreference { get; set; } = "Current preference level: {pref}. \nTo set a new preference, please specify the new preference level.";
+    
+    [Description("The result for the preference command when the new preference was successfully set. \n" +
+                 "# \'{newPref}\' will be replaced with the new preference.")]
     public string PlayerPreferenceSuccess { get; set; } = "Successfully set your 3114 preference to {newPref}";
 
-    [Description("This message will be added on to the response whenever a player incorrectly uses the player preference command.")]
-    public string PlayerPreferenceUsage { get; set; } = "\nCommand Usage: \n.3114preference [Scp 3114 Preference (0 - 10)]. Ie: .3114preference 8";
-
-    [Description("This message will be shown when an error occurs while using the player preference command.")]
+    
+    [Description("\n\n# [Error Messages] \n" +
+                 "# This message will be shown when an error occurs while using the player preference command.")]
     public string PlayerPreferenceErrorMessage { get; set; } = "An error has occured and we could not set your player preference. (You must be a player to use this command).";
 
-    [Description("A list of roles, and their color / names. This is used to show a player what role they are disguised at, if infinite disguise is enabled")]
+    [Description("The result for the preference command when the new preference cannot be determined. \n" +
+                 "# \'{arg}\' will be replaced with the failed input they tried to select.")]
+    public string PlayerPreferenceCouldntDetermineNewPreference { get; set; } = "Could not determine the desired preference from \"{arg}\". Ensure it is a number with no decimals.";
+
+    [Description("The message showed when a player with DNT tries to use the preference command but AllowExplicitDNTOptIn is disabled.")]
+    public string PlayerPreferenceDntDisabled { get; set; } = "You have DNT on! Players with DNT cannot use this feature! Consider turning off DNT to use this feature.";
+
+    
+    
+
+
+    [Description("\n\n\n# ====================== [Lists] ======================\n" +
+                 "# [Roles Names / Colors]\n" +
+                 "# A list of roles, and their color / names. This is used to show a player what role they are disguised at, if infinite disguise is enabled")]
     public Dictionary<RoleTypeId, string> RoleNames { get; set; } = new Dictionary<RoleTypeId, string>()
     {
         { RoleTypeId.Scp079, "<color=#ff0000>Scp 079</color>" },

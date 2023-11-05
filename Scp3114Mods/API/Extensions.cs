@@ -91,38 +91,32 @@ public static class Extensions
     public static bool SetDisguise(this Player ply, string name, RoleTypeId role, bool shouldUpdateCooldown = false) => SetDisguise(ply, role.GetRagdoll(name), shouldUpdateCooldown);
     public static bool SetDisguise(this Player ply, BasicRagdoll ragdoll, bool shouldUpdateCooldown = false)
     {
-        if (ragdoll is null)
-        {
-            Logging.Debug("Ragdoll is null.");
-            return false;
-        }
         if (ply.RoleBase is not Scp3114Role role)
             return false;
         if (!role.SubroutineModule.TryGetSubroutine<Scp3114Disguise>(out var disguise) || disguise is null)
             return false;
 
         role.Ragdoll = ragdoll;
+        
 
         // Update Disguise Component
         disguise.CurRagdoll = ragdoll;
         
         // Update Identity Component
         // These 2 will change the disguise duration.
-        if (shouldUpdateCooldown)
-        {
-            float duration = Scp3114Mods.Singleton.Config.DisguiseDuration;
-            if (duration == 0)
-                duration = disguise._identity._disguiseDurationSeconds;
+        float duration = Scp3114Mods.Singleton.Config.DisguiseDuration;
+        if (duration == 0)
+            duration = disguise._identity._disguiseDurationSeconds;
 
-            if (duration < 0)
-            {
-                duration = float.MaxValue;
-                disguise._identity.RemainingDuration.Remaining = float.MaxValue;
-            }
+        if (duration < 0)
+        {
+            duration = float.MaxValue;
+            disguise._identity.RemainingDuration.Remaining = float.MaxValue;
+        }
             
-            disguise._identity.RemainingDuration.Trigger(duration);
-            // Resets it - disguise._identity.RemainingDuration.NextUse = NetworkTime.time - 1;
-        } 
+        disguise._identity.RemainingDuration.Trigger(duration);
+        // Resets it - disguise._identity.RemainingDuration.NextUse = NetworkTime.time - 1;
+        
         disguise._identity._wasDisguised = true;
         disguise._identity.CurIdentity.Ragdoll = ragdoll;
         disguise.ScpRole.Disguised = true;
@@ -133,6 +127,7 @@ public static class Extensions
         return true;
     }
 
+    
     private static void _getDebuggingInfo(Scp3114Disguise disguise, string prefix)
     {
         Timing.CallDelayed(1f, () =>
@@ -189,10 +184,19 @@ public static class Extensions
 
         if (newRole is RoleTypeId.None or RoleTypeId.Spectator or RoleTypeId.Scp3114 or RoleTypeId.Overwatch)
         {
+            disguise._identity.RemainingDuration.Clear();
             role.Disguised = false;
             return true;
         }
         
+        string name = disguise.CurRagdoll.NetworkInfo.Nickname;
+        disguise._identity.RemainingDuration.Clear();
+        role.Disguised = false;
+        Timing.CallDelayed(.2f, () =>
+        {
+            SetDisguise(ply, name, newRole, true);
+        });
+        return true;
         // This Doesnt Work!
         
         var data = (disguise.CurRagdoll.NetworkInfo);

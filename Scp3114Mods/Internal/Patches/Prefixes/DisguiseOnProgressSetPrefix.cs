@@ -28,6 +28,7 @@ internal static class DisguiseOnProgressSetPrefix
     /// This may be better as a postfix or transpiler but it would require extra work.
     /// I believe a postfix would require clearing the cooldown, and re-triggering it which may break things. 
     /// </summary>
+    [HarmonyPrefix]
     private static bool Prefix(Scp3114Disguise __instance)
     {
         //Logging.Debug("Disguise Patch Triggered");

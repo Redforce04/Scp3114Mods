@@ -10,12 +10,17 @@
 // -----------------------------------------
 
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using CommandSystem;
 using MEC;
+using Mirror;
+using PlayerRoles;
 using PlayerRoles.PlayableScps.Scp3114;
+using PlayerRoles.PlayableScps.Subroutines;
 using PlayerRoles.Ragdolls;
 using PluginAPI.Core;
 using Scp3114Mods.API;
+using Utils.Networking;
 
 namespace Scp3114Mods.Internal.Commands;
 
@@ -57,7 +62,7 @@ public class Cmd3114Debugging : ICommand, IUsageProvider
                        "3 - Force _wasDisguised Change \n" +
                        "4 - Quiet Status Change \n" +
                        "5 - Quiet Status Change Equipping \n" +
-                       "6 -  \n" +
+                       "6 - Fake Clear Identity \n" +
                        "7 -  \n" +
                        "8 -  \n";
             return false;
@@ -124,7 +129,12 @@ public class Cmd3114Debugging : ICommand, IUsageProvider
                 disguise._identity.CurIdentity._status = Scp3114Identity.DisguiseStatus.Equipping;
                 break;
             case 6:
-                featureName = "ForceClearCooldownDisguise";
+                featureName = "Fake Clear Identity";
+                foreach (Player specPly in Player.GetPlayers())
+                {
+                    if (specPly == ply)
+                            continue;
+                }
                 break;
             case 7:
                 featureName = "ForceCooldownIdentity";
@@ -140,7 +150,52 @@ public class Cmd3114Debugging : ICommand, IUsageProvider
         response = $"Successfully ran feature {feature} on player {ply.Nickname}.";
         return true;
     }
+    /*[MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void Send<T>(T message, int channelId = 0) where T : struct, NetworkMessage
+    {
+        using NetworkWriterPooled networkWriterPooled = NetworkWriterPool.Get();
+        NetworkMessages.Pack(message, networkWriterPooled);
+        NetworkDiagnostics.OnSend(message, channelId, networkWriterPooled.Position, 1);
+        Send(networkWriterPooled.ToArraySegment(), channelId);
+    }*/
 
+    public void Write(NetworkWriter writer, Scp3114Disguise disguise)
+    {
+        var prevStatus = disguise._identity.CurIdentity._status;
+        disguise._identity.CurIdentity._status = Scp3114Identity.DisguiseStatus.None;
+        var message = new SubroutineMessage(disguise._identity, true);
+        writer.WriteByte((byte)message._subroutineIndex);
+        if (message._subroutineIndex != 0)
+        {
+            writer.WriteReferenceHub(message._target);
+            writer.WriteRoleType(message._role);
+            NetworkWriterPooled networkWriterPooled = NetworkWriterPool.Get();
+            if (message._isConfirmation.GetValueOrDefault())
+            {
+                message._subroutine.ServerWriteRpc(networkWriterPooled);
+            }
+            else
+            {
+                message._subroutine.ClientWriteCmd(networkWriterPooled);
+            }
+            int num = networkWriterPooled.Position;
+            if (num > 65790)
+            {
+                num = 0;
+            }
+            writer.WriteByte((byte)Math.Min(num, 255));
+            if (num >= 255)
+            {
+                writer.WriteUShort((ushort)(num - 255));
+            }
+            writer.WriteBytes(networkWriterPooled.buffer, 0, num);
+            networkWriterPooled.Dispose();
+        }
+
+        disguise._identity.CurIdentity._status = prevStatus;
+    }
+
+    
     public string Command => "3114Debug";
     public string[] Aliases => Array.Empty<string>();
     public string Description => "Allows debugging of Scp 3114 Features.";

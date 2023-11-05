@@ -26,6 +26,7 @@ internal static class StrangleOnAnyPlayerDiedPostfix
     /// <summary>
     /// Triggers a cooldown when scp3114 kills a player. Thanks Sr. Licht!
     /// </summary>
+    [HarmonyPostfix]
     private static void Postfix(Scp3114Strangle __instance, ReferenceHub deadPly, DamageHandlerBase handler)
     {
         try

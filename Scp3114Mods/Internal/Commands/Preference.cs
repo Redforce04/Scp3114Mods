@@ -40,11 +40,11 @@ internal class Preference : ICommand, IUsageProvider
             pref += 5;
             if (!Scp3114Mods.Singleton.Config.AllowExplicitDntOptIn)
             {
-                response = Scp3114Mods.Singleton.Translation.PlayerPreferenceDNTDisabled.Replace("{pref}", pref.ToString());
+                response = Scp3114Mods.Singleton.Translation.PlayerPreferenceDntDisabled.Replace("{pref}", pref.ToString());
                 return false;
             }
 
-            response = Scp3114Mods.Singleton.Translation.PlayerPreferenceCmdDNTOptInMessage.Replace("{pref}", pref.ToString());
+            response = Scp3114Mods.Singleton.Translation.PlayerPreferenceCmdDntOptInMessage.Replace("{pref}", pref.ToString());
             return false;
         }
         if (arguments.Count < 1)
