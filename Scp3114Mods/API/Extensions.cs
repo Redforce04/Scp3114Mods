@@ -40,6 +40,14 @@ public static class Extensions
         }
         if (ply.Items.Any(x =>
             {
+                if (Scp3114Mods.Singleton.Config.CandyLosesInnocence && x.ItemTypeId == ItemType.SCP330)
+                {
+                    Logging.Debug($"IsPlayerInnocent {ply.Nickname} - false [Candy]");
+                    return true;
+                }
+                
+                return Scp3114Mods.Singleton.Config.StrangleNonInnocentItems.Contains(x.ItemTypeId);
+                // obsolete - makes it more configurable 
                 if (x is Firearm)
                 {
                     Logging.Debug($"IsPlayerInnocent {ply.Nickname} - false [Firearm]");
@@ -52,11 +60,6 @@ public static class Extensions
                     return true;
                 }
 
-                if (Scp3114Mods.Singleton.Config.CandyLosesInnocence && x.ItemTypeId == ItemType.SCP330)
-                {
-                    Logging.Debug($"IsPlayerInnocent {ply.Nickname} - false [Candy]");
-                    return true;
-                }
 			    
                 return false;
             }))

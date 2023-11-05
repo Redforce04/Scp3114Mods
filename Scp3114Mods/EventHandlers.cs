@@ -111,7 +111,7 @@ public class EventHandlers
     [PluginEvent(ServerEventType.PlayerChangeRole)]
     internal void OnRoleChange(PlayerChangeRoleEvent ev)
     {
-        if (Scp3114Mods.Singleton.Config.SpectatorHideMode == SpectatorHideMode.Disabled)
+        //if (Scp3114Mods.Singleton.Config.SpectatorHideMode == SpectatorHideMode.Disabled)
             goto skipSpectatorCheck;
 
         // Spoof player role for spectators if config is enabled.
@@ -167,7 +167,7 @@ public class EventHandlers
     /// Hides scp 3114 to players (if the config setting is enabled.)
     /// </summary>
     private void _hide3114ForSpectator(Player spectator)
-    {
+    {/*
         try
         {
             foreach (Player ply in Player.GetPlayers())
@@ -192,9 +192,24 @@ public class EventHandlers
         {
             Logging.Warning($"Could not send fake spectator info to player {spectator.Nickname}.");
             Logging.Debug($"Exception: \n{e}");
-        }
+        }*/
     }
-    
+
+    /// <summary>
+    /// Manages how much ahp to give.
+    /// </summary>
+    /// <param name="ev"></param>
+    internal void OnSlappingPlayer(SlappingPlayerEventArgs ev)
+    {
+        // set ahp to give.
+        if (Scp3114Mods.Singleton.Config.AhpToGiveOnSlap.ContainsKey(ev.Target.Role))
+            ev.HumeShieldToGive = Scp3114Mods.Singleton.Config.AhpToGiveOnSlap[ev.Target.Role];
+        
+        if (Scp3114Mods.Singleton.Config.DamageSlapDeals.ContainsKey(ev.Target.Role))
+            ev.DamageAmount = Scp3114Mods.Singleton.Config.DamageSlapDeals[ev.Target.Role];
+        
+        Logging.Debug($"[Slap: {ev.Player.Nickname} -> {ev.Target.Nickname}, Dmg: {ev.DamageAmount} HP, +{ev.HumeShieldToGive} AHP, {ev.IsAllowed}]");
+    }
     /// <summary>
     /// Process strangle finished info, and applies a proper strangle cooldown.
     /// </summary>

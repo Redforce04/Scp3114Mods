@@ -84,6 +84,7 @@ public class Scp3114Mods : Plugin<Config, Translations>
         
         API.Events.StranglingPlayer += Handlers.OnStranglingPlayer;
         API.Events.StrangleFinished += Handlers.OnStrangleFinished;
+        API.Events.SlappingPlayer += Handlers.OnSlappingPlayer;
         EventManager.RegisterEvents(Handlers);
         if(Config.DisguiseDuration < 0)
             Handlers.StartDisguiseCoroutine();
@@ -112,6 +113,7 @@ public class Scp3114Mods : Plugin<Config, Translations>
         Harmony.UnpatchAll();
         API.Events.StranglingPlayer -= Handlers.OnStranglingPlayer;
         API.Events.StrangleFinished -= Handlers.OnStrangleFinished;
+        API.Events.SlappingPlayer -= Handlers.OnSlappingPlayer;
         Handlers.StopDisguiseCoroutine();
         EventManager.UnregisterEvents(Handlers);
         EventsRegistered = false;

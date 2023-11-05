@@ -96,9 +96,41 @@ public class Config : Exiled.API.Interfaces.IConfig
     
     [Description("Can Scp3114 strangle innocents / Class D or Scientists without a weapon.")]
     public bool AllowStranglingInnocents { get; set; } = false;
+
+    [Description("Each role, and how much ahp to give 3114 when they slap the role. Roles not mentioned will use default ahp.")]
+    public Dictionary<RoleTypeId, float> AhpToGiveOnSlap { get; set; } = new Dictionary<RoleTypeId, float>()
+    {
+        { RoleTypeId.ClassD, 5 },
+        { RoleTypeId.Scientist, 5 },
+        { RoleTypeId.ChaosRepressor, 35 },
+        { RoleTypeId.ChaosMarauder, 30 },
+        { RoleTypeId.ChaosConscript, 25 },
+        { RoleTypeId.ChaosRifleman, 25 },
+        { RoleTypeId.NtfCaptain, 35 },
+        { RoleTypeId.NtfSergeant, 30 },
+        { RoleTypeId.NtfSpecialist, 30 },
+        { RoleTypeId.NtfPrivate, 25 },
+        { RoleTypeId.FacilityGuard, 15 },
+    };
     
-    [Description("Items that will not prevent strangline.")]
-    public List<ItemType> StrangleNonInnocentItems = new List<ItemType>()
+    [Description("The damage that the slap deals to different roles. Roles not mentioned will deal default damage.")]
+    public Dictionary<RoleTypeId, float> DamageSlapDeals { get; set; } = new Dictionary<RoleTypeId, float>()
+    {
+        { RoleTypeId.ClassD, 10 },
+        { RoleTypeId.Scientist, 10 },
+        { RoleTypeId.ChaosRepressor, 35 },
+        { RoleTypeId.ChaosMarauder, 30 },
+        { RoleTypeId.ChaosConscript, 25 },
+        { RoleTypeId.ChaosRifleman, 25 },
+        { RoleTypeId.NtfCaptain, 35 },
+        { RoleTypeId.NtfSergeant, 30 },
+        { RoleTypeId.NtfSpecialist, 30 },
+        { RoleTypeId.NtfPrivate, 25 },
+        { RoleTypeId.FacilityGuard, 15 },
+    };
+    
+    [Description("Items that will mark a player as \"Non-Innocent\".")]
+    public List<ItemType> StrangleNonInnocentItems { get; set; } = new List<ItemType>()
     {
         ItemType.GrenadeFlash,
         ItemType.GrenadeHE,
@@ -116,6 +148,8 @@ public class Config : Exiled.API.Interfaces.IConfig
         ItemType.GunE11SR,
         ItemType.GunFSP9,
         ItemType.GunFRMG0,
+        ItemType.ParticleDisruptor,
+        ItemType.MicroHID,
         ItemType.SCP330
     };
     [Description("Does the target of the strangle have to have an empty hand.")]
@@ -126,7 +160,20 @@ public class Config : Exiled.API.Interfaces.IConfig
     [Description("A list of items that will be considered \"empty hands\" for the empty hand strangle config.")]
     public List<ItemType> ItemsThatWontBlockStrangle { get; set; } = new List<ItemType>()
     {
-        
+        ItemType.KeycardO5,
+        ItemType.KeycardContainmentEngineer,
+        ItemType.KeycardChaosInsurgency,
+        ItemType.KeycardMTFCaptain,
+        ItemType.KeycardMTFOperative,
+        ItemType.KeycardMTFPrivate,
+        ItemType.KeycardFacilityManager,
+        ItemType.KeycardGuard,
+        ItemType.KeycardZoneManager,
+        ItemType.KeycardResearchCoordinator,
+        ItemType.KeycardScientist,
+        ItemType.KeycardJanitor,
+        ItemType.Coin,
+        ItemType.Radio,
     };
 
     [Description("Can tutorials be strangled.")]
@@ -149,25 +196,25 @@ public class Config : Exiled.API.Interfaces.IConfig
     [Description("How long the cooldown between new disguises lasts. 0 disabled.")]
     public float DisguiseCooldown { get; set; } = -1;
     
-    //[Description("How long the cooldown after a failed disguis lasts. -1 is game default.")]
-    //public float DisguiseFailedCooldown { get; set; } = -1;
+    [Description("How long the cooldown after a failed disguise lasts. -1 is game default.")]
+    public float DisguiseFailedCooldown { get; set; } = -1;
 
-    [Description("If set to true, players will be pulled from the human pool (default game). Otherwise, players are pulled from scps.")]
-    public bool SpawnFromHumanRoles { get; set; } = true;
+    [Description("If set to true, players will be spawned from the default system, (using non-scp lives). Otherwise, players are pulled from scps. This must be set to false to use the player preference system.")]
+    public bool SpawnFromHumanRoles { get; set; } = false;
 
-    [Description("Percent of Scp3114 spawning in general. Only applies if SpawnFromHumanRoles is enabled. Set to 100 to guarantee at least one scp3114 spawn. if 50/50, half of games won't spawn scp3114.")]
-    public int SpawnChance { get; set; } = 50;
+    [Description("Percent of Scp3114 spawning in general.")]
+    public int SpawnChance { get; set; } = 100;
     
-    [Description("Percent of players to spawn as Scp3114. Ex: 10% of alive human players will become 3114 (if SpawnFromHumanRoles is enabled) or there is a 10% chance of and scp starting as 3114")]
+    /*[Description("Percent of players to spawn as Scp3114. Ex: 10% of alive human players will become 3114 (if SpawnFromHumanRoles is enabled) or there is a 10% chance of and scp starting as 3114")]
     public int PercentOfPlayers { get; set; } = 10;
 
     [Description("How many players can be spawned as scp3114.")]
     public int MinimumScp3114Count { get; set; } = 1;
 
     [Description("How many players can be spawned as scp3114.")]
-    public int MaximumScp3114Count { get; set; } = 1;
+    public int MaximumScp3114Count { get; set; } = 1;*/
 
-    [Description("Allows you to prevent spectators from watch 3114's role. Available Options: \n" +
+    /*[Description("Allows you to prevent spectators from watch 3114's role. Available Options: \n" +
                  "# Disabled - Allows spectators to spectate 3114 normally.\n" +
                  "# PersistentRoleSpoof - 3114 will have a different role visible to spectators, even when out of disguise.\n" +
                  "# TemporaryRoleSpoof - 3114 will have a different role only while in disguise.")]
@@ -175,7 +222,7 @@ public class Config : Exiled.API.Interfaces.IConfig
 
     [Description("What role spectators will see when viewing 3114. By default (None) the role will be chosen based off of the last role 3114 had. ")]
     public RoleTypeId SpectatorRole3114 { get; set; } = RoleTypeId.None;
-
+    */
 }
 
 public enum SpectatorHideMode

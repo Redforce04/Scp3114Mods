@@ -18,12 +18,13 @@ namespace Scp3114Mods.Internal.Patches;
 
 internal static class TranspilerExtensions
 {
-    internal static void Log(this CodeInstruction instruction, int index, int injectedIndex = -1, bool enable = true,
+    internal static CodeInstruction Log(this CodeInstruction instruction, int index, int injectedIndex = -1, bool enable = true,
         bool debug = false)
     {
         if (!enable)
-            return;
+            return instruction;
         Logging.Debug(GetOpcodeDebugLabel(instruction, index, injectedIndex, debug ? OutputIncludes.Debug : OutputIncludes.Basic));
+        return instruction;
     } 
     internal static string GetOpcodeDebugLabel(this CodeInstruction instruction, int index, int injectedIndex = -1, OutputIncludes output = OutputIncludes.Basic)
     {
