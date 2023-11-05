@@ -57,7 +57,13 @@ internal class Scp3114RoleName : ICommand, IUsageProvider
             return false;
         }
 
-        return _changeDisguiseName(ply, arguments.At(1), out response);
+        string name = "";
+        for (int i = 1; i < arguments.Count(); i++)
+        {
+            name += $"{arguments.At(i)} ";
+        }
+        
+        return _changeDisguiseName(ply, name.TrimEnd(), out response);
     }
     private static bool _changeDisguiseName(Player ply, string newName, out string response)
     {

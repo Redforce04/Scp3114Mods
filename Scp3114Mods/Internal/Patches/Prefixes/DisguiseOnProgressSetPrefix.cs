@@ -30,8 +30,8 @@ internal static class DisguiseOnProgressSetPrefix
     /// </summary>
     private static bool Prefix(Scp3114Disguise __instance)
     {
-        Logging.Debug("Disguise Patch Triggered");
-        return true;
+        //Logging.Debug("Disguise Patch Triggered");
+        //return true;
         try
         {
 
@@ -48,8 +48,8 @@ internal static class DisguiseOnProgressSetPrefix
             {
                 __instance._equipSkinSound.Stop();
                 curIdentity.Status = Scp3114Identity.DisguiseStatus.None;
-                //if (Scp3114Mods.Singleton.Config.DisguiseFailedCooldown != 0)
-                //   __instance.Cooldown.Trigger(Scp3114Mods.Singleton.Config.DisguiseFailedCooldown == -1 ? __instance.Duration : Scp3114Mods.Singleton.Config.DisguiseFailedCooldown);
+                if (Scp3114Mods.Singleton.Config.DisguiseFailedCooldown != 0)
+                   __instance.Cooldown.Trigger(Scp3114Mods.Singleton.Config.DisguiseFailedCooldown == -1 ? __instance.Duration : Scp3114Mods.Singleton.Config.DisguiseFailedCooldown);
                 Logging.Debug("Disguise Cooldown Triggered");
             }
 
@@ -60,5 +60,6 @@ internal static class DisguiseOnProgressSetPrefix
             Logging.Debug($"An error has been caught at DisguiseOnProgressSetPrefix. Exception: \n{e}");
         }
 
+        return true;
     }
 }

@@ -11,6 +11,7 @@
 // -----------------------------------------
 
 using InventorySystem.Items.Firearms;
+using MEC;
 using Mirror;
 using PlayerRoles;
 using PlayerRoles.PlayableScps.Scp3114;
@@ -87,8 +88,8 @@ public static class Extensions
         Logging.Debug("Ragdoll created");
         return component;
     }
-    public static bool SetDisguise(this Player ply, string name, RoleTypeId role) => SetDisguise(ply, role.GetRagdoll(name));
-    public static bool SetDisguise(this Player ply, BasicRagdoll ragdoll)
+    public static bool SetDisguise(this Player ply, string name, RoleTypeId role, bool shouldUpdateCooldown = false) => SetDisguise(ply, role.GetRagdoll(name), shouldUpdateCooldown);
+    public static bool SetDisguise(this Player ply, BasicRagdoll ragdoll, bool shouldUpdateCooldown = false)
     {
         if (ragdoll is null)
         {
@@ -100,20 +101,62 @@ public static class Extensions
         if (!role.SubroutineModule.TryGetSubroutine<Scp3114Disguise>(out var disguise) || disguise is null)
             return false;
 
-        disguise._identity.CurIdentity.Ragdoll = ragdoll;
         role.Ragdoll = ragdoll;
-        disguise._identity.RemainingDuration.NextUse = NetworkTime.time - 1;
-        disguise._identity.CurIdentity.Status = Scp3114Identity.DisguiseStatus.Active;
-        disguise._identity.ServerResendIdentity();
-        //disguise._identity.RemainingDuration.Trigger(Scp3114Mods.Singleton.Config.DisguiseDuration );
+
+        // Update Disguise Component
+        disguise.CurRagdoll = ragdoll;
+        
+        // Update Identity Component
+        // These 2 will change the disguise duration.
+        if (shouldUpdateCooldown)
+        {
+            float duration = Scp3114Mods.Singleton.Config.DisguiseDuration;
+            if (duration == 0)
+                duration = disguise._identity._disguiseDurationSeconds;
+
+            if (duration < 0)
+            {
+                duration = float.MaxValue;
+                disguise._identity.RemainingDuration.Remaining = float.MaxValue;
+            }
+            
+            disguise._identity.RemainingDuration.Trigger(duration);
+            // Resets it - disguise._identity.RemainingDuration.NextUse = NetworkTime.time - 1;
+        } 
         disguise._identity._wasDisguised = true;
-        
-        disguise._identity.OnIdentityStatusChanged();
+        disguise._identity.CurIdentity.Ragdoll = ragdoll;
+        disguise.ScpRole.Disguised = true;
+        // disguise._identity.ServerResendIdentity();
+        // disguise._identity.OnIdentityStatusChanged();
 
-        
-        Logging.Debug("Setting disguise");
-
+        _getDebuggingInfo(disguise, $"Set Disguise");
         return true;
+    }
+
+    private static void _getDebuggingInfo(Scp3114Disguise disguise, string prefix)
+    {
+        Timing.CallDelayed(1f, () =>
+        {
+            Logging.Debug($"{prefix}\n=============================" +
+                          $"\nIdentity Stolen Role: {disguise._identity.CurIdentity.StolenRole}" +
+                          $"\n3114 Stolen Role: {disguise.ScpRole.CurIdentity.StolenRole}" +
+                          $"\nIdentity Status: {disguise._identity.CurIdentity._status}" +
+                          $"\n3114 Identity Status: {disguise.ScpRole.CurIdentity._status}" +
+                          $"\n3114 Disguised: {disguise.ScpRole.Disguised}" +
+                          $"\nIdentity Was Disguised: {disguise._identity._wasDisguised}" +
+                          "\n-----------------------------" +
+                          $"\nDisguise Info: {_getRagdollInfo(disguise!.CurRagdoll.Info)}" +
+                          $"\nDisguise Network Info: {_getRagdollInfo(disguise!.CurRagdoll.NetworkInfo)}" +
+                          $"\nIdentity Info: {_getRagdollInfo(disguise._identity.CurIdentity.Ragdoll.Info)}" +
+                          $"\nIdentity Network Info: {_getRagdollInfo(disguise._identity!.CurIdentity.Ragdoll.NetworkInfo)}" +
+                          $"\n3114 Info: {_getRagdollInfo(disguise.ScpRole.CurIdentity.Ragdoll.Info)}" +
+                          $"\n3114 Network Info: {_getRagdollInfo(disguise.ScpRole.CurIdentity.Ragdoll.NetworkInfo)}" +
+                          $"\n=============================");
+        });
+    }
+    private static string _getRagdollInfo(RagdollData data)
+    {
+        return $"[Nick: {data.Nickname}, Role: {data.RoleType}]";
     }
     // Untested
     public static bool SetDisguiseUnitId(this Player ply, byte unitId)
@@ -128,7 +171,6 @@ public static class Extensions
         return true;
     }
     
-    // This only kinda works...
     public static bool SetDisguiseRole(this Player ply, RoleTypeId newRole)
     {
         
@@ -142,64 +184,70 @@ public static class Extensions
 
         if (disguise.CurRagdoll is null || disguise._identity.CurIdentity.Status == Scp3114Identity.DisguiseStatus.None)
         {
-            // try this but with a twist????????
-            Logging.Debug("Creating new ragdoll.");
-            var ragdoll = newRole.GetRagdoll(ply.Nickname);
-            disguise.CurRagdoll = ragdoll;
-            role.Ragdoll = ragdoll;
-            disguise._identity.RemainingDuration.NextUse = NetworkTime.time - 1;
-            disguise._identity.CurIdentity.Status = Scp3114Identity.DisguiseStatus.Active;
-            disguise._identity.OnIdentityStatusChanged();
+            return ply.SetDisguise(ply.Nickname, newRole, false);
         }
-        else
-        {
-            disguise._identity.CurIdentity.Status = Scp3114Identity.DisguiseStatus.None;
 
-            Logging.Debug("Reusing ragdoll.");
-            var data = (disguise.CurRagdoll.NetworkInfo);
-            var ragdollData = new RagdollData(data.OwnerHub, data.Handler, newRole, data.StartPosition, data.StartRotation, data.Nickname, data.CreationTime);
-            disguise.CurRagdoll.NetworkInfo = ragdollData;
-            role.Ragdoll.NetworkInfo = ragdollData;
-            disguise.CurRagdoll.Info = ragdollData;
-            role.Ragdoll.Info = ragdollData;
-            disguise._identity.CurIdentity.Status = Scp3114Identity.DisguiseStatus.Active;
+        if (newRole is RoleTypeId.None or RoleTypeId.Spectator or RoleTypeId.Scp3114 or RoleTypeId.Overwatch)
+        {
+            role.Disguised = false;
+            return true;
         }
         
+        // This Doesnt Work!
+        
+        var data = (disguise.CurRagdoll.NetworkInfo);
+        var ragdollData = new RagdollData(data.OwnerHub, data.Handler, newRole, data.StartPosition, data.StartRotation, data.Nickname, data.CreationTime);
+        
+        // Change Role Ragdoll
+        role.Ragdoll.NetworkInfo = ragdollData;
+        role.Ragdoll.Info = ragdollData;
+        
+        // Change Disguise Ragdoll
+        disguise.CurRagdoll.NetworkInfo = ragdollData;
+        disguise.CurRagdoll.Info = ragdollData;
+        
+        // Change Identity Ragdoll
+        disguise._identity.CurIdentity.Ragdoll.Info = ragdollData;
+        disguise._identity.CurIdentity.Ragdoll.NetworkInfo = ragdollData;
+            
         disguise._identity.ServerResendIdentity();
+        _getDebuggingInfo(disguise, "Set Role");
+
         return true;
     }
 
     public static bool SetDisguiseName(this Player ply, string name)
     {
-        if (ply.RoleBase is not Scp3114Role role ||
-            !role.SubroutineModule.TryGetSubroutine<Scp3114Disguise>(out var disguise) || disguise is null)
+        if (ply.RoleBase is not Scp3114Role role || !role.SubroutineModule.TryGetSubroutine<Scp3114Disguise>(out var disguise) || disguise is null)
         {
             return false;
         }
-        SetDisguise(ply, name, role._identity.CurIdentity?.Ragdoll.Info.RoleType ?? (UnityEngine.Random.Range(0, 4) == 1 ? RoleTypeId.Scientist : RoleTypeId.ClassD));
-        return true;
-        //if (disguise.CurRagdoll is null || disguise._identity.CurIdentity.Status == Scp3114Identity.DisguiseStatus.None || !role.Disguised)
-        //{
-            Logging.Debug("Creating new ragdoll.");
-            var ragdoll = ply.Role.GetRagdoll(name);
-            disguise.CurRagdoll = ragdoll;
-            role.Ragdoll = ragdoll;
-            disguise._identity.RemainingDuration.NextUse = NetworkTime.time - 1;
-            disguise._identity.CurIdentity.Status = Scp3114Identity.DisguiseStatus.Active;
-        /*}
-        else
-        {
-            Logging.Debug("Reusing ragdoll.");
-            var data = (disguise.CurRagdoll.NetworkInfo);
-            var info = new RagdollData(data.OwnerHub, data.Handler, data.RoleType, data.StartPosition, data.StartRotation, name, data.CreationTime);
-            disguise.CurRagdoll.NetworkInfo = info;
-            role.Ragdoll.NetworkInfo = info;
-            disguise.CurRagdoll.Info = info;
-            role.Ragdoll.Info = info;
-            disguise._identity.OnIdentityStatusChanged();
-        }*/
         
+        if (disguise.CurRagdoll is null || disguise._identity.CurIdentity.Status == Scp3114Identity.DisguiseStatus.None || !role.Disguised)
+        {
+            // we may want to return false here, because they should be creating a new ragdoll - who knows.
+            return SetDisguise(ply, name, (UnityEngine.Random.Range(0, 4) == 1 ? RoleTypeId.Scientist : RoleTypeId.ClassD));
+        }
+        
+        // This Confirmed Works!
+        var data = (disguise.CurRagdoll.NetworkInfo);
+        var info = new RagdollData(data.OwnerHub, data.Handler, data.RoleType, data.StartPosition, data.StartRotation, name, data.CreationTime);
+        
+        // Change Role Ragdoll
+        role.Ragdoll.NetworkInfo = info;
+        role.Ragdoll.Info = info;
+        
+        // Change Disguise Ragdoll
+        disguise.CurRagdoll.NetworkInfo = info;
+        disguise.CurRagdoll.Info = info;
+        
+        // Change Identity Ragdoll
+        disguise._identity.CurIdentity.Ragdoll.Info = info;
+        disguise._identity.CurIdentity.Ragdoll.NetworkInfo = info;
+            
         disguise._identity.ServerResendIdentity();
+        _getDebuggingInfo(disguise, "Set Disguise Name");
+
         return true;
     }
 
@@ -214,17 +262,6 @@ public static class Extensions
         //disguise._identity.RemainingDuration.Trigger(duration);
         return true;
     }
-    public static bool SetDisguisePermanentDuration(this Player ply, float duration)
-    {
-        if (ply.RoleBase is not Scp3114Role role)
-            return false;
-        if (!role.SubroutineModule.TryGetSubroutine<Scp3114Identity>(out var identity) || identity is null)
-            return false;
-        Logging.Debug("Setting Scp3114 Permanent Disguise");
-        identity._disguiseDurationSeconds = duration;
-        identity.ServerResendIdentity();
-        return true;
-    }
 
     public static void TriggerDisguiseRemoval(this Player ply)
     {
@@ -232,6 +269,7 @@ public static class Extensions
             return;
         if (!role.SubroutineModule.TryGetSubroutine<Scp3114Disguise>(out var disguise) || disguise is null)
             return;
+        role.Disguised = false;
         Logging.Debug("Removing Scp 3114 Disguise");
         disguise._identity.OnIdentityStatusChanged();
     }

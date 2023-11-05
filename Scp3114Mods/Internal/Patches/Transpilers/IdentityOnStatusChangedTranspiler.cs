@@ -12,9 +12,11 @@
 using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
+using MEC;
 using NorthwoodLib.Pools;
 using PlayerRoles;
 using PlayerRoles.PlayableScps.Scp3114;
+using PlayerRoles.Ragdolls;
 using PluginAPI.Core;
 using Scp3114Mods.API;
 using static HarmonyLib.AccessTools;
@@ -129,8 +131,7 @@ internal static class IdentityOnStatusChangedTranspiler
         {
             value = _identity._disguiseDurationSeconds;
         }
-
-        if (value < 0)
+        else if (value < 0)
         {
             string role = "";
             if (Scp3114Mods.Singleton.Translation.RoleNames.ContainsKey(_identity.CurIdentity.StolenRole))
@@ -138,9 +139,35 @@ internal static class IdentityOnStatusChangedTranspiler
             else
                 role = _identity.CurIdentity.StolenRole.ToString();
             Scp3114Mods.Singleton.Handlers.ShowInfiniteDisguiseMessage(Player.Get(_identity.Owner), role);
-            return -1;
+            value = float.MaxValue;
         }
+
+        _identity.ScpRole.SubroutineModule.TryGetSubroutine<Scp3114Disguise>(out var disguise);
+        _identity.RemainingDuration.Remaining = value;
+        Timing.CallDelayed(1f, () =>
+        {
+        });
+        Logging.Debug($"=============================" +
+                      $"\nIdentity Stolen Role: {_identity.CurIdentity.StolenRole}" +
+                      $"\n3114 Stolen Role: {_identity.ScpRole.CurIdentity.StolenRole}" +
+                      $"\nIdentity Status: {_identity.CurIdentity._status}" +
+                      $"\n3114 Identity Status: {_identity.ScpRole.CurIdentity._status}" +
+                      $"\n3114 Disguised: {_identity.ScpRole.Disguised}" +
+                      $"\nIdentity Was Disguised: {_identity._wasDisguised}" +
+                      "\n-----------------------------" +
+                      $"\nDisguise Info: {_getRagdollInfo(disguise!.CurRagdoll.Info)}" +
+                      $"\nDisguise Network Info: {_getRagdollInfo(disguise!.CurRagdoll.NetworkInfo)}" +
+                      $"\nIdentity Info: {_getRagdollInfo(_identity.CurIdentity.Ragdoll.Info)}" +
+                      $"\nIdentity Network Info: {_getRagdollInfo(_identity!.CurIdentity.Ragdoll.NetworkInfo)}" +
+                      $"\n3114 Info: {_getRagdollInfo(_identity.ScpRole.CurIdentity.Ragdoll.Info)}" +
+                      $"\n3114 Network Info: {_getRagdollInfo(_identity.ScpRole.CurIdentity.Ragdoll.NetworkInfo)}" +
+                      $"\n=============================");        
         return value;
+    }
+
+    private static string _getRagdollInfo(RagdollData data)
+    {
+        return $"[Nick: {data.Nickname}, Role: {data.RoleType}]";
     }
 
     private static bool CanClearIdentity(Scp3114Identity _identity)
