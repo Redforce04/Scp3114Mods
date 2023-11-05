@@ -11,6 +11,7 @@
 // -----------------------------------------
 
 using System.ComponentModel;
+using PlayerRoles;
 
 namespace Scp3114Mods;
 
@@ -35,7 +36,8 @@ public class Translations
 
     [Description("The message to show a player when they select a usable item that can be faked.")]
     public string FakeUsableInform { get; set; } = "You can fake use items by right clicking with your mouse";
-    
+
+    public string InfiniteDisguisesEnabled { get; set; } = "Infinite disguises are enabled. A cooldown will not be shown.\nCurrent Disguise: {role}";
     
     [Description("The message showed when a player tries to use the preference command, but has DNT enabled." +
                  "# If AllowExplicitDNTOptIn is not enabled it will show the PlayerPreferenceDNTDisabled translation instead." +
@@ -67,4 +69,32 @@ public class Translations
 
     [Description("This message will be shown when an error occurs while using the player preference command.")]
     public string PlayerPreferenceErrorMessage { get; set; } = "An error has occured and we could not set your player preference. (You must be a player to use this command).";
+
+    [Description("A list of roles, and their color / names. This is used to show a player what role they are disguised at, if infinite disguise is enabled")]
+    public Dictionary<RoleTypeId, string> RoleNames { get; set; } = new Dictionary<RoleTypeId, string>()
+    {
+        { RoleTypeId.Scp079, "<color=#ff0000>Scp 079</color>" },
+        { RoleTypeId.Scp049, "<color=#ff0000>Scp 049</color>" },
+        { RoleTypeId.Scp0492, "<color=#ff0000>Scp 049-2</color>" },
+        { RoleTypeId.Scp096, "<color=#ff0000>Scp 096</color>" },
+        { RoleTypeId.Scp173, "<color=#ff0000>Scp 173</color>" },
+        { RoleTypeId.Scp106, "<color=#ff0000>Scp 106</color>" },
+        { RoleTypeId.Scp939, "<color=#ff0000>Scp 939</color>" },
+        { RoleTypeId.Scp3114, "<color=#ff0000>Scp 3114</color>" },
+        { RoleTypeId.ChaosMarauder, "<color=#008f1c>Chaos Marauder</color>" },
+        { RoleTypeId.ChaosRepressor, "<color=#008f1c>Chaos Repressor</color>" },
+        { RoleTypeId.ChaosConscript, "<color=#008f1c>Chaos Conscript</color>" },
+        { RoleTypeId.ChaosRifleman, "<color=#008f1c>Chaos Rifleman</color>" },
+        { RoleTypeId.NtfCaptain, "<color=#003dca>Ntf Captain</color>" },
+        { RoleTypeId.NtfSpecialist, "<color=#0096ff>Ntf Specialist</color>" },
+        { RoleTypeId.NtfSergeant, "<color=#0096ff>Ntf Sergeant</color>" },
+        { RoleTypeId.NtfPrivate, "<color=#70c3ff>Ntf Private</color>" },
+        { RoleTypeId.FacilityGuard, "<color=#556278>Facility Guard</color>" },
+        { RoleTypeId.Scientist, "<color=#ffff7c>Scientist</color>" },
+        { RoleTypeId.ClassD, "<color=#ff8000>ClassD</color>" },
+        { RoleTypeId.Spectator, "<color=#ffffff>Spectator</color>" },
+        { RoleTypeId.Overwatch, "<color=#00ffff>Overwatch</color>" },
+        { RoleTypeId.Filmmaker, "<color=#010101>Filmmaker</color>" },
+        { RoleTypeId.Tutorial, "<color=#ff00b0>Tutorial</color>" },
+    };
 }

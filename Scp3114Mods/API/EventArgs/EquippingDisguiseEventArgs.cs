@@ -17,12 +17,16 @@ namespace Scp3114Mods.API.EventArgs;
 
 public class EquippingDisguiseEventArgs
 {
-    public EquippingDisguiseEventArgs()
+    public EquippingDisguiseEventArgs(object instance)
     {
         
+        //curIdentity.Ragdoll = base.CurRagdoll;
+        //curIdentity.UnitNameId = (byte)(_prevUnitIds.TryGetValue(base.CurRagdoll, out var value) ? value : 0);
+        //curIdentity.Status = Scp3114Identity.DisguiseStatus.Equipping;
     }
     public Player Player { get; }
     public Scp3114Disguise Disguise { get; }
     public BasicRagdoll Ragdoll { get; }
+    public bool PlaySound { get; set; }
     public bool IsAllowed { get; set; }
 }

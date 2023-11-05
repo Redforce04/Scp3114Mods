@@ -71,5 +71,5 @@ internal class Better3114Command : ICommand, IUsageProvider
     public string Command => "Better3114";
     public string[] Aliases => Array.Empty<string>();
     public string Description => "Enables or disables better 3114 functionality.";
-    public string[] Usage => new[] { "Enabled / Disable" };
+    public string[] Usage => new[] { "Enabled / Disable / Reload" };
 }

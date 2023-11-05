@@ -33,6 +33,37 @@ namespace Scp3114Mods;
 
 public class EventHandlers
 {
+    internal static CoroutineHandle InfiniteDisguiseCoroutine;
+    internal void StartDisguiseCoroutine() => InfiniteDisguiseCoroutine = Timing.RunCoroutine(InfiniteDisguiseAbility(), "Infinite Disguise Ability Coroutine");
+    internal void StopDisguiseCoroutine()
+    {
+        if(InfiniteDisguiseCoroutine.IsRunning) 
+            Timing.KillCoroutines(InfiniteDisguiseCoroutine);
+    }
+    /// <summary>
+    /// Used to make the disguise icon appear "infinite".
+    /// </summary>
+    private IEnumerator<float> InfiniteDisguiseAbility()
+    {
+        // Doesnt work anyways :( - instead I just don't send any disguise info.
+        yield break;
+        Logging.Debug("Starting Infinite Disguise Coroutine.");
+        while (true)
+        {
+            foreach (Player ply in Player.GetPlayers())
+            {
+                if (ply.Role != RoleTypeId.Scp3114)
+                    continue;
+                if (ply.RoleBase is not Scp3114Role role || !role.Disguised)
+                    continue;
+                if (!role.SubroutineModule.TryGetSubroutine<Scp3114Identity>(out var identity) || identity is null)
+                    continue;
+                identity.RemainingDuration.Remaining = identity._disguiseDurationSeconds;
+            }
+            // This can be shorter, which will make it look smoother, but it also uses slightly more resources.
+            yield return Timing.WaitForSeconds(3);
+        }
+    }
 
     // Shows a message to players informing them about the various features they can use as scp3114
     [PluginEvent(ServerEventType.PlayerChangeItem)]
@@ -62,6 +93,13 @@ public class EventHandlers
         {
             Logging.Debug("An error has occured.");
         }
+    }
+
+    internal void ShowInfiniteDisguiseMessage(Player ply, string role)
+    {
+        if (ply is null)
+            return;
+        _sendMessage(ply, Scp3114Mods.Singleton.Translation.InfiniteDisguisesEnabled.Replace("{role}", role), 6f);
     }
     
     [PluginEvent(ServerEventType.RoundStart)]

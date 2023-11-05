@@ -13,7 +13,9 @@ using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using NorthwoodLib.Pools;
+using PlayerRoles;
 using PlayerRoles.PlayableScps.Scp3114;
+using PluginAPI.Core;
 using Scp3114Mods.API;
 using static HarmonyLib.AccessTools;
 
@@ -130,7 +132,13 @@ internal static class IdentityOnStatusChangedTranspiler
 
         if (value < 0)
         {
-            value = float.MaxValue;
+            string role = "";
+            if (Scp3114Mods.Singleton.Translation.RoleNames.ContainsKey(_identity.CurIdentity.StolenRole))
+                role = Scp3114Mods.Singleton.Translation.RoleNames[_identity.CurIdentity.StolenRole];
+            else
+                role = _identity.CurIdentity.StolenRole.ToString();
+            Scp3114Mods.Singleton.Handlers.ShowInfiniteDisguiseMessage(Player.Get(_identity.Owner), role);
+            return -1;
         }
         return value;
     }
@@ -138,5 +146,7 @@ internal static class IdentityOnStatusChangedTranspiler
     private static bool CanClearIdentity(Scp3114Identity _identity)
     {
         return true;
+        // prevent infinite disguises from clearing.
+        //return Scp3114Mods.Singleton.Config.DisguiseDuration == -1;
     }
 }

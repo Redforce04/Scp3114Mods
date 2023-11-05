@@ -72,6 +72,9 @@ public class Config : Exiled.API.Interfaces.IConfig
     [Description("Allows players with DNT to opt in to having thier scp 3114 preference stored. Player with DNT will have their userid hashed then stored.")]
     public bool AllowExplicitDntOptIn { get; set; } = true;
 
+    [Description("Should 049 be able to resurrect players who have had their skin stolen. It may remove immersion, and expose Scp 3114.")]
+    public bool Allow049ResurrectStolenSkinPlayer { get; set; } = true;
+
     [Description("The default player preference for users who haven't opted in, or have DNT enabled.")]
     public int DefaultPlayerPreference { get; set; } = 5;
     

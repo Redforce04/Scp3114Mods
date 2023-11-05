@@ -58,6 +58,9 @@
 
     <ItemGroup>
       <Reference Include="Assembly-CSharp-Publicized" HintPath="$(EXILED_REFERENCES)\Assembly-CSharp-Halloween-Publicized.dll" />
+      <Reference Include="Exiled.Events">
+        <HintPath>..\..\EXILED\bin\Debug\Exiled.Events.dll</HintPath>
+      </Reference>
       <Reference Include="System" />
 	  <Reference Include="Mirror" HintPath="$(EXILED_REFERENCES)\Mirror.dll" />
       <Reference Include="System.ComponentModel.DataAnnotations" HintPath="$(EXILED_REFERENCES)\System.ComponentModel.DataAnnotations.dll" />

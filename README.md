@@ -28,14 +28,14 @@ Well Scp3114Modifications has got you covered! It seeks to help balance the hott
 - Empty Hand Protection - Disable strangling for player holding items (like disarming).
   - You can add items to a blacklist to prevent them from counting.
   - This can be toggled on for everyone, or just innocent classes.
+- 049 Revive Stolen Skins. - Allow 049 to revive corpses that have been used as a disguise, or are currently in use.
+
 
 ## WIP / Planned Features:
 - Spectator Hiding - Hide the role of SCP3114 for spectators.
 - Different Spawn Locations - Spawn in 939 cryo chambers, 049's chambers, test chamber, and more.
 - Radio Usage - Talk to the other team while in disguise.
 - AHP Damage Settings - Allow custom AHP Regeneration options.
-- 049 Revive Corpses. - Allow 049 to revive corpses that have been used as disguises.
-- 049-2 Eat Used Corpses - Allow 049-2 to eat corpses that have been used as disguises.
 
 
 # ***DNT NOTICE***
