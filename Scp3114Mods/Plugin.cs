@@ -33,7 +33,7 @@ public class Scp3114Mods : Plugin<Config, Translations>
     public override Version RequiredExiledVersion  => new Version(8, 3, 0); 
     public override PluginPriority Priority => PluginPriority.Default;
 #endif
-    public const string VersionName = "1.0.4";
+    public const string VersionName = "1.0.5";
     public static Scp3114Mods Singleton = null!;
 
     public Harmony Harmony { get; set; } = null!;

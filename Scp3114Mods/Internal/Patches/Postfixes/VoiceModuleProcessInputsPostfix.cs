@@ -25,13 +25,14 @@ internal static class VoiceModuleProcessInputsPostfix
     {
         try
         {
+            Logging.Debug($"[3114Radio {__instance.Owner.nicknameSync._firstNickname}]");
             if (!Scp3114Mods.Singleton.Config.DisguisedPlayersCanUseRadio)
                 return;
             if (!alt || !__instance.IsDisguised)
                 return;
             if (Player.Get(__instance.Owner).CurrentItem.ItemTypeId != ItemType.Radio)
                 return;
-
+            Logging.Debug($"[Scp 3114 Radio Usage {__instance.Owner.nicknameSync._firstNickname}]");
             __result = VoiceChatChannel.Radio;
         }
         catch (Exception e)

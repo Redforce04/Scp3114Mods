@@ -22,7 +22,7 @@ using static HarmonyLib.AccessTools;
 namespace Scp3114Mods.Internal.Patches.Transpilers;
 
 [HarmonyPatch(typeof(Scp3114Slap), nameof(Scp3114Slap.DamagePlayers))]
-public static class Scp3114SlapOnDamagingTranspiler 
+internal static class Scp3114SlapOnDamagingTranspiler 
 {
     [HarmonyTranspiler]
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)

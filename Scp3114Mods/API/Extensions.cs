@@ -123,7 +123,7 @@ public static class Extensions
         // disguise._identity.ServerResendIdentity();
         // disguise._identity.OnIdentityStatusChanged();
 
-        _getDebuggingInfo(disguise, $"Set Disguise");
+        //_getDebuggingInfo(disguise, $"Set Disguise");
         return true;
     }
 
@@ -250,7 +250,7 @@ public static class Extensions
         disguise._identity.CurIdentity.Ragdoll.NetworkInfo = info;
             
         disguise._identity.ServerResendIdentity();
-        _getDebuggingInfo(disguise, "Set Disguise Name");
+        //_getDebuggingInfo(disguise, "Set Disguise Name");
 
         return true;
     }
@@ -263,6 +263,7 @@ public static class Extensions
             return false;
         
         disguise._identity.RemainingDuration.Remaining = duration;
+        disguise._identity.ServerSendRpc(disguise.Owner);
         //disguise._identity.RemainingDuration.Trigger(duration);
         return true;
     }
@@ -274,8 +275,10 @@ public static class Extensions
         if (!role.SubroutineModule.TryGetSubroutine<Scp3114Disguise>(out var disguise) || disguise is null)
             return;
         role.Disguised = false;
+        disguise._identity.RemainingDuration.Clear();
+        //disguise._identity.OnIdentityStatusChanged();
+        //disguise._identity.ServerResendIdentity();
         Logging.Debug("Removing Scp 3114 Disguise");
-        disguise._identity.OnIdentityStatusChanged();
     }
 
     public static void TriggerDisguiseCooldown(this Player ply, float cooldown)
@@ -286,6 +289,7 @@ public static class Extensions
             return;
         disguise.Cooldown.Clear();
         disguise.Cooldown.Trigger(cooldown);
+        disguise._identity.ServerSendRpc(disguise.Owner);
         Logging.Debug("Triggering Cooldown for Disguise");
     }
     public static void TriggerStrangleCooldown(this Player ply, float cooldown)
@@ -296,6 +300,7 @@ public static class Extensions
             return;
         strangle.Cooldown.Clear();
         strangle.Cooldown.Trigger(cooldown);
+        strangle.ServerSendRpc(strangle.Owner);
         Logging.Debug("Triggering Cooldown for Strangle");
     }
     public static void TriggerSlapCooldown(this Player ply, float cooldown)
@@ -306,6 +311,7 @@ public static class Extensions
             return;
         slap.Cooldown.Clear();
         slap.Cooldown.Trigger(cooldown);
+        slap.ServerSendRpc(slap.Owner);
         Logging.Debug("Triggering Cooldown for Slap");
     }
 
